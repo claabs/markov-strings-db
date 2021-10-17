@@ -1,5 +1,5 @@
-import { map, some } from 'lodash'
-import Markov, { MarkovResult } from '../src'
+import { map, some } from 'lodash';
+import Markov, { MarkovResult } from '../src';
 
 const data = [
   'Lorem ipsum dolor sit amet',
@@ -9,23 +9,22 @@ const data = [
   'Justo nisi fringilla dui',
   'Egestas bibendum eros nisi ut lacus',
   "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
-  'Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet'
-]
+  'Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet',
+];
 
-jest.setTimeout(1000000)
+jest.setTimeout(1000000);
 describe('Markov class', () => {
   describe('Constructor', () => {
-
     it('should have a default stateSize', () => {
-      const markov = new Markov()
-      expect(markov.options.stateSize).toBe(2)
-    })
+      const markov = new Markov();
+      expect(markov.options.stateSize).toBe(2);
+    });
 
     it('should save a different stateSize', () => {
-      const markov = new Markov({ options: { stateSize: 3 } })
-      expect(markov.options.stateSize).toBe(3)
-    })
-  })
+      const markov = new Markov({ options: { stateSize: 3 } });
+      expect(markov.options.stateSize).toBe(3);
+    });
+  });
 
   describe('Adding data', () => {
     // it('should build synchronously', () => {
@@ -34,8 +33,6 @@ describe('Markov class', () => {
     //   markov.addData(data)
     //   expect(markov.corpus).not.toEqual({})
     // })
-
-
     // it('should throw an error if the data structure is invalid', () => {
     //   const markov = new Markov()
     //   expect(() => {
@@ -43,14 +40,12 @@ describe('Markov class', () => {
     //     markov.addData([{}])
     //   }).toThrowError()
     // })
-
     // it('should accept objects', () => {
     //   const markov = new Markov()
     //   markov.addData(data.map(o => ({ string: o })))
     //   expect(markov.corpus).not.toEqual({})
     // })
-
-  })
+  });
 
   // describe('After adding data', () => {
   //   let markov: Markov
@@ -149,45 +144,48 @@ describe('Markov class', () => {
   // })
 
   describe('The sentence generator', () => {
-    let markov: Markov
+    let markov: Markov;
 
     afterEach(async () => {
       await markov.disconnect();
-    })
+    });
 
     it('should throw an error if the corpus is not built', async () => {
-      markov = new Markov()
+      markov = new Markov();
       await markov.connect();
-      await expect(markov.generate()).rejects
-        .toThrowError('Corpus is empty. There is either no data, or the data is not sufficient to create markov chains.')
-    })
+      await expect(markov.generate()).rejects.toThrowError(
+        'Corpus is empty. There is either no data, or the data is not sufficient to create markov chains.'
+      );
+    });
 
     it('should return a result if under the tries limit', async () => {
-      markov = new Markov()
+      markov = new Markov();
       await markov.connect();
       await markov.addData(data);
-      expect.assertions(10)
+      expect.assertions(10);
 
-      for (let i = 0; i < 10; i++) {
-        const sentence = await markov.generate({ maxTries: 20 })
-        expect(sentence.tries).toBeLessThanOrEqual(20)
+      for (let i = 0; i < 10; i += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        const sentence = await markov.generate({ maxTries: 20 });
+        expect(sentence.tries).toBeLessThanOrEqual(20);
       }
-    })
+    });
 
     it.skip('should call the `filter` callback', async () => {
-      const filter = jest.fn(x => true)
-      await markov.generate({ filter })
-      expect(filter).toHaveBeenCalled()
-    })
+      const filter = jest.fn((x) => true);
+      await markov.generate({ filter });
+      expect(filter).toHaveBeenCalled();
+    });
 
     it.skip('should throw an error after 10 tries, by default', async () => {
-      await expect(markov.generate({
-        filter(result: MarkovResult): boolean {
-          return false
-        }
-      })
-      ).rejects.toThrowError('10')
-    })
+      await expect(
+        markov.generate({
+          filter(result: MarkovResult): boolean {
+            return false;
+          },
+        })
+      ).rejects.toThrowError('10');
+    });
 
     // it.skip('should end with a value from endWords', async () => {
     //   expect.assertions(10)
@@ -201,23 +199,22 @@ describe('Markov class', () => {
     // })
 
     it.skip(`should pass the result object to 'filter(result)'`, async () => {
-      expect.assertions(6)
+      expect.assertions(6);
 
       const options = {
         minWords: 5,
         maxTries: 10,
         filter: (result: MarkovResult): boolean => {
-          expect(Object.keys(result)).toHaveLength(4)
-          expect(result).toHaveProperty('string')
-          expect(result).toHaveProperty('score')
-          expect(result).toHaveProperty('refs')
-          expect(Array.isArray(result.refs)).toBeTruthy()
-          expect(result).toHaveProperty('tries')
-          return true
-        }
-      }
-      await markov.generate(options)
-    })
-
-  })
-})
+          expect(Object.keys(result)).toHaveLength(4);
+          expect(result).toHaveProperty('string');
+          expect(result).toHaveProperty('score');
+          expect(result).toHaveProperty('refs');
+          expect(Array.isArray(result.refs)).toBeTruthy();
+          expect(result).toHaveProperty('tries');
+          return true;
+        },
+      };
+      await markov.generate(options);
+    });
+  });
+});
