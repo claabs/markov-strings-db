@@ -337,17 +337,17 @@ export default class Markov {
       const arr = [(await this.sampleFragment(this.db))!]
 
       let score = 0
-      const block = arr[arr.length - 1] // last value in array
-      const entry = await CorpusEntry.findOneOrFail({where: {block: block.words}});
       
       // loop to build a complete sentence
       for (let innerTries = 0; innerTries < maxTries; innerTries++) {
+        const block = arr[arr.length - 1] // last value in array
+        const entry = await CorpusEntry.findOne({where: {block: block.words}});
+        if (!entry) break;
+
         const state = await this.sampleFragment(entry); // Find a following item in the corpus
 
         // If a state cannot be found, the sentence can't be completed
-        if (!state) {
-          break
-        }
+        if (!state) break;
 
         // add new state to list
         arr.push(state)
