@@ -1,18 +1,27 @@
-import { assignIn, cloneDeep, flatten, includes, isEmpty, isString, slice, some, uniqBy } from 'lodash'
+import { assignIn, flatten, isString, slice, uniqBy } from 'lodash'
+import { Connection, ConnectionOptions, createConnection } from 'typeorm'
+import { CorpusEntry } from './entity/CorpusEntry'
+import { MarkovFragment } from './entity/MarkovFragment'
+import { MarkovInputData } from './entity/MarkovInputData'
+import { MarkovOptions } from './entity/MarkovOptions'
+import { MarkovRoot } from './entity/MarkovRoot'
 
-export type MarkovInputData = { string: string }[]
 
 export type MarkovGenerateOptions = {
   maxTries?: number,
-  prng?: () => number,
   filter?: (result: MarkovResult) => boolean
 }
 
 /**
  * Data to build the Markov instance
  */
+export type MarkovConstructorProps = {
+  id?: string;
+  options?: MarkovConstructorOptions;
+}
+
 export type MarkovConstructorOptions = {
-  stateSize?: number
+  stateSize?: number;
 }
 
 /**
@@ -23,16 +32,16 @@ export type MarkovDataMembers = {
   stateSize: number
 }
 
-export type MarkovResult = {
-  string: string,
-  score: number,
-  refs: MarkovInputData,
-  tries: number
+export interface AddDataProps {
+  string: string;
+  custom?: Record<string, boolean | string | number>;
 }
 
-export type MarkovFragment = {
-  words: string
-  refs: MarkovInputData
+export interface MarkovResult {
+  string: string;
+  score: number;
+  refs: MarkovInputData[];
+  tries: number;
 }
 
 export type Corpus = { [key: string]: MarkovFragment[] }
@@ -44,18 +53,19 @@ export type MarkovImportExport = {
   options: MarkovDataMembers
 }
 
-function sampleWithPRNG<T>(array: T[], prng: () => number = Math.random): T | undefined {
-  const length = array == null ? 0 : array.length
-  return length ? array[Math.floor(prng() * length)] : undefined
-}
+
 
 export default class Markov {
-  public data: MarkovInputData
-  public options: MarkovDataMembers
+  // public data: MarkovInputData
+  public db: MarkovRoot;
 
-  public startWords: MarkovFragment[] = []
-  public endWords: MarkovFragment[] = []
-  public corpus: Corpus = {}
+  public options: MarkovDataMembers;
+
+  public connection: Connection;
+
+  public id?: string;
+
+
 
   private defaultOptions: MarkovDataMembers = {
     stateSize: 2
@@ -64,57 +74,103 @@ export default class Markov {
   /**
    * Creates an instance of Markov generator.
    *
-   * @param {MarkovConstructorOptions} [options={}]
+   * @param {MarkovConstructorProps} [options={}]
    * @memberof Markov
    */
-  constructor(options: MarkovConstructorOptions = {}) {
-    this.data = []
+  constructor(props?: MarkovConstructorProps) {
+    // this.data = []
+
+    this.id = props?.id;
 
     // Save options
     this.options = this.defaultOptions
-    assignIn(this.options, options)
+    assignIn(this.options, props?.options)
   }
 
-  /**
-   * Imports a corpus. This overwrites existing data.
-   *
-   * @param data
-   */
-  public import(data: MarkovImportExport): void {
-    this.options = cloneDeep(data.options)
-    this.corpus = cloneDeep(data.corpus)
-    this.startWords = cloneDeep(data.startWords)
-    this.endWords = cloneDeep(data.endWords)
+  public async connect(connectionOptions?: ConnectionOptions): Promise<Connection> {
+    if (connectionOptions) {
+      this.connection = await createConnection(connectionOptions);
+    } else {
+      this.connection = await createConnection();
+    }
+    let db = await MarkovRoot.findOne({
+      id: this.id
+    });
+    if (!db) {
+      const options = new MarkovOptions();
+      options.stateSize = this.options.stateSize;
+      await options.save();
+      db = new MarkovRoot();
+      db.id = this.id as string; // hack
+      db.options = options;
+      await db.save();
+    }
+    this.db = db;
+    return this.connection;
   }
 
-  /**
-   * Exports structed data used to generate sentence.
-   */
-  public export(): MarkovImportExport {
-    return cloneDeep({
-      options: this.options,
-      corpus: this.corpus,
-      startWords: this.startWords,
-      endWords: this.endWords
-    })
+  public async disconnect(): Promise<void> {
+    if (this.connection) {
+      return this.connection.close();
+    }
   }
 
-  public addData(rawData: MarkovInputData | string[]) {
+  private async sampleFragment(condition: MarkovRoot | CorpusEntry): Promise<MarkovFragment | undefined> {
+    let queryCondition;
+    if (condition instanceof MarkovRoot) {
+      queryCondition = { startWordMarkov: condition };
+    } else {
+      queryCondition = { corpusEntry: condition };
+    }
+    const fragment = await MarkovFragment.createQueryBuilder()
+      .where(queryCondition)
+      .orderBy('RANDOM()')
+      .limit(1)
+      .getOne();
+    return fragment;
+  }
+
+
+  // /**
+  //  * Imports a corpus. This overwrites existing data.
+  //  *
+  //  * @param data
+  //  */
+  // public import(data: MarkovImportExport): void {
+  //   this.options = cloneDeep(data.options)
+  //   this.corpus = cloneDeep(data.corpus)
+  //   this.startWords = cloneDeep(data.startWords)
+  //   this.endWords = cloneDeep(data.endWords)
+  // }
+
+  // /**
+  //  * Exports structed data used to generate sentence.
+  //  */
+  // public export(): MarkovImportExport {
+  //   return cloneDeep({
+  //     options: this.options,
+  //     corpus: this.corpus,
+  //     startWords: this.startWords,
+  //     endWords: this.endWords
+  //   })
+  // }
+
+  public async addData(rawData: AddDataProps[] | string[]) {
     // Format data if necessary
-    let input: MarkovInputData = []
+    let input: AddDataProps[] = []
     if (isString(rawData[0])) {
       input = (rawData as string[]).map(s => ({ string: s }))
     }
     else if (rawData[0].hasOwnProperty('string')) {
-      input = rawData as MarkovInputData
+      input = rawData as AddDataProps[]
     }
     else {
       throw new Error('Objects in your corpus must have a "string" property')
     }
 
-    this.buildCorpus(input)
+    await this.buildCorpus(input)
 
-    this.data = this.data.concat(input)
+    // this.data = this.data.concat(input)
   }
 
   /**
@@ -122,11 +178,11 @@ export default class Markov {
    *
    * @memberof Markov
    */
-  private buildCorpus(data: MarkovInputData): void {
-    const options = this.options
+  private async buildCorpus(data: AddDataProps[]): Promise<void> {
+    const options = this.db.options;
 
     // Loop through all sentences
-    data.forEach(item => {
+    for (const item of data) {
       const line = item.string
       const words = line.split(' ')
       const stateSize = options.stateSize // Default value of 2 is set in the constructor
@@ -135,18 +191,31 @@ export default class Markov {
       // "Start words" is the list of words that can start a generated chain.
 
       const start = slice(words, 0, stateSize).join(' ')
-      const oldStartObj = this.startWords.find(o => o.words === start)
+      const oldStartObj = await MarkovFragment.findOne({startWordMarkov: this.db, words: start});
 
       // If we already have identical startWords
       if (oldStartObj) {
+        let inputData = await MarkovInputData.findOne({fragment: oldStartObj});
         // If the current item is not present in the references, add it
-        if (!includes(oldStartObj.refs, item)) {
-          oldStartObj.refs.push(item)
+        if (!inputData) {
+          inputData = new MarkovInputData();
+          inputData.fragment = oldStartObj;
+          inputData.string = item.string;
+          inputData.custom = item.custom;
+          await MarkovInputData.save(inputData);
         }
       }
       else {
         // Add the startWords (and reference) to the list
-        this.startWords.push({ words: start, refs: [item] })
+        const fragment = new MarkovFragment();
+        fragment.words = start;
+        fragment.startWordMarkov = this.db;
+        await MarkovFragment.save(fragment);
+        const ref = new MarkovInputData();
+        ref.fragment = fragment;
+        ref.string = item.string;
+        ref.custom = item.custom;
+        await MarkovInputData.save(ref);
       }
 
       //#endregion Start words
@@ -155,13 +224,27 @@ export default class Markov {
       // "End words" is the list of words that can end a generated chain.
 
       const end = slice(words, words.length - stateSize, words.length).join(' ')
-      const oldEndObj = this.endWords.find(o => o.words === end)
+      const oldEndObj = await MarkovFragment.findOne({endWordMarkov: this.db, words: end});
       if (oldEndObj) {
-        if (!includes(oldEndObj.refs, item)) {
-          oldEndObj.refs.push(item)
+        let inputData = await MarkovInputData.findOne({fragment: oldEndObj});
+        // If the current item is not present in the references, add it
+        if (!inputData) {
+          inputData = new MarkovInputData();
+          inputData.fragment = oldEndObj;
+          inputData.string = item.string;
+          inputData.custom = item.custom;
+          await MarkovInputData.save(inputData);
         }
       } else {
-        this.endWords.push({ words: end, refs: [item] })
+        const fragment = new MarkovFragment();
+        fragment.words = end;
+        fragment.endWordMarkov = this.db;
+        await MarkovFragment.save(fragment);
+        const ref = new MarkovInputData();
+        ref.fragment = fragment;
+        ref.string = item.string;
+        ref.custom = item.custom;
+        await MarkovInputData.save(ref);
       }
 
       //#endregion End words
@@ -179,25 +262,50 @@ export default class Markov {
         }
 
         // Check if the corpus already has a corresponding "curr" block
-        if (this.corpus.hasOwnProperty(curr)) {
-          const oldObj = this.corpus[curr].find(o => o.words === next)
+        const block = await CorpusEntry.findOne({markov: this.db, block: curr});
+        if (block) {
+          const oldObj = await MarkovFragment.findOne({corpusEntry: block, words: next});
           if (oldObj) {
             // If the corpus already has the chain "curr -> next",
             // just add the current reference for this block
-            oldObj.refs.push(item)
+            const ref = new MarkovInputData();
+            ref.fragment = oldObj;
+            ref.string = item.string;
+            ref.custom = item.custom;
+            await MarkovInputData.save(ref);
           } else {
             // Add the new "next" block in the list of possible paths for "curr"
-            this.corpus[curr].push({ words: next, refs: [item] })
+            const fragment = new MarkovFragment();
+            fragment.words = next;
+            fragment.corpusEntry = block;
+            await MarkovFragment.save(fragment);
+            const ref = new MarkovInputData();
+            ref.fragment = fragment;
+            ref.string = item.string;
+            ref.custom = item.custom;
+            await MarkovInputData.save(ref);
           }
         }
         else {
           // Add the "curr" block and link it with the "next" one
-          this.corpus[curr] = [{ words: next, refs: [item] }]
+          const entry = new CorpusEntry();
+          entry.block = curr;
+          entry.markov = this.db;
+          await CorpusEntry.save(entry);
+          const fragment = new MarkovFragment();
+          fragment.words = next;
+          fragment.corpusEntry = entry;
+          await MarkovFragment.save(fragment);
+          const ref = new MarkovInputData();
+          ref.fragment = fragment;
+          ref.string = item.string;
+          ref.custom = item.custom;
+        await MarkovInputData.save(ref);
         }
       }
 
       //#endregion Corpus generation
-    })
+    }
   }
 
 
@@ -208,14 +316,15 @@ export default class Markov {
    * @returns {MarkovResult}
    * @memberof Markov
    */
-  public generate(options: MarkovGenerateOptions = {}): MarkovResult {
-    if (isEmpty(this.corpus)) {
+  public async generate(options: MarkovGenerateOptions = {}): Promise<MarkovResult> {
+    // const corpusSize = await CorpusEntry.count({markov: this.db});
+    const corpusSize = await CorpusEntry.count({markov: this.db});
+    if (corpusSize <= 0) {
       throw new Error('Corpus is empty. There is either no data, or the data is not sufficient to create markov chains.')
     }
 
-    const corpus = cloneDeep(this.corpus)
+    // const corpus = cloneDeep(this.corpus)
     const maxTries = options.maxTries ? options.maxTries : 10
-    const prng = options.prng ? options.prng : Math.random
 
     let tries: number
 
@@ -225,14 +334,15 @@ export default class Markov {
 
       // Create an array of MarkovCorpusItems
       // The first item is a random startWords element
-      const arr = [sampleWithPRNG(this.startWords, prng)!]
+      const arr = [(await this.sampleFragment(this.db))!]
 
       let score = 0
-
+      const block = arr[arr.length - 1] // last value in array
+      const entry = await CorpusEntry.findOneOrFail({where: {block: block.words}});
+      
       // loop to build a complete sentence
       for (let innerTries = 0; innerTries < maxTries; innerTries++) {
-        const block = arr[arr.length - 1] // last value in array
-        const state = sampleWithPRNG(corpus[block.words], prng) // Find a following item in the corpus
+        const state = await this.sampleFragment(entry); // Find a following item in the corpus
 
         // If a state cannot be found, the sentence can't be completed
         if (!state) {
@@ -243,10 +353,11 @@ export default class Markov {
         arr.push(state)
 
         // increment score
-        score += corpus[block.words].length - 1 // increment score
+        score += state.words.length - 1 // increment score
 
         // is sentence finished?
-        if (some(this.endWords, { words: state.words })) {
+        const endWords = await MarkovFragment.findOne({endWordMarkov: this.db, words: state.words});
+        if (endWords) {
           ended = true
           break
         }
