@@ -61,7 +61,7 @@ export default class Markov {
 
   public connection: Connection;
 
-  public id?: string;
+  public id: string;
 
   private defaultOptions: MarkovDataMembers = {
     stateSize: 2,
@@ -76,7 +76,7 @@ export default class Markov {
   constructor(props?: MarkovConstructorProps) {
     // this.data = []
 
-    this.id = props?.id;
+    this.id = props?.id || '1';
 
     // Save options
     this.options = this.defaultOptions;
@@ -97,11 +97,12 @@ export default class Markov {
       options.stateSize = this.options.stateSize;
       await options.save();
       db = new MarkovRoot();
-      db.id = this.id as string; // hack
+      db.id = this.id;
       db.options = options;
       await db.save();
     }
     this.db = db;
+    this.id = this.db.id;
     return this.connection;
   }
 

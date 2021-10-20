@@ -1,4 +1,3 @@
-
 const devConfig = {
     type: 'sqlite',
     database: process.env.CONFIG_DIRECTORY
@@ -6,8 +5,8 @@ const devConfig = {
       : 'config/db/db.sqlite3',
     synchronize: true,
     migrationsRun: false,
-    logging: true,
-    logging: "all",
+    // logging: true,
+    // logging: "all",
     enableWAL: true,
     autoLoadEntities: true,
     entities: ['src/entity/**/*.ts'],
