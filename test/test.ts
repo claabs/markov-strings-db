@@ -1,4 +1,5 @@
-import Markov, { MarkovResult } from '../src';
+import { mkdir, writeFile, stat } from 'fs/promises';
+import Markov, { AddDataProps, MarkovResult } from '../src';
 import { CorpusEntry } from '../src/entity/CorpusEntry';
 import { MarkovFragment } from '../src/entity/MarkovFragment';
 
@@ -157,47 +158,55 @@ describe('Markov class', () => {
       });
     });
 
-    //   describe('Export data', () => {
-    //     it('should clone the original corpus values', () => {
-    //       const exported = markov.export()
+    describe('Export data', () => {
+      it('should clone the original database values', async () => {
+        const exported = await markov.export();
 
-    //       expect(exported.corpus).toEqual(markov.corpus)
-    //       expect(exported.corpus).not.toBe(markov.corpus)
+        if (!(await stat('test-output'))) {
+          await mkdir('test-output');
+        }
+        await writeFile('test-output/export.json', JSON.stringify(exported));
 
-    //       expect(exported.startWords).not.toBe(markov.startWords)
-    //       expect(exported.startWords).toEqual(markov.startWords)
+        expect(exported).toBeDefined();
 
-    //       expect(exported.endWords).not.toBe(markov.endWords)
-    //       expect(exported.endWords).toEqual(markov.endWords)
+        // expect(exported.corpus).toEqual(markov.corpus);
+        // expect(exported.corpus).not.toBe(markov.corpus);
 
-    //       expect(exported.options).toEqual(markov.options)
-    //       expect(exported.options).not.toBe(markov.options)
-    //     })
-    //   })
+        // expect(exported.startWords).not.toBe(markov.startWords);
+        // expect(exported.startWords).toEqual(markov.startWords);
 
-    //   describe('Import data', () => {
-    //     it('should overwrite original values', () => {
-    //       const exported = markov.export()
-    //       const newMarkov = new Markov()
+        // expect(exported.endWords).not.toBe(markov.endWords);
+        // expect(exported.endWords).toEqual(markov.endWords);
 
-    //       // Make sure that the corpus is empty
-    //       expect(newMarkov.corpus).toEqual({})
+        // expect(exported.options).toEqual(markov.options);
+        // expect(exported.options).not.toBe(markov.options);
+      });
+    });
 
-    //       newMarkov.import(exported)
+    describe('Import data', () => {
+      it('should overwrite original values', async () => {
+        const exported = await markov.export();
 
-    //       expect(newMarkov.corpus).toEqual(exported.corpus)
-    //       expect(newMarkov.corpus).not.toBe(exported.corpus)
+        // Clear database
+        await markov.connection.dropDatabase();
+        await markov.disconnect();
+        markov = new Markov();
+        await markov.connect();
+        let count = await CorpusEntry.count({
+          markov: markov.db,
+        });
+        expect(count).toEqual(0);
 
-    //       expect(newMarkov.startWords).toEqual(exported.startWords)
-    //       expect(newMarkov.startWords).not.toBe(exported.startWords)
+        await markov.import(exported);
 
-    //       expect(newMarkov.endWords).toEqual(exported.endWords)
-    //       expect(newMarkov.endWords).not.toBe(exported.endWords)
+        count = await CorpusEntry.count({
+          markov: markov.db,
+        });
+        expect(count).not.toEqual(0);
 
-    //       expect(newMarkov.options).toEqual(exported.options)
-    //       expect(newMarkov.options).not.toBe(exported.options)
-    //     })
-    //   })
+        // Make sure that the corpus is empty
+      });
+    });
   });
 
   describe('The sentence generator', () => {
@@ -217,6 +226,31 @@ describe('Markov class', () => {
         await expect(markov.generate()).rejects.toThrowError(
           'Corpus is empty. There is either no data, or the data is not sufficient to create markov chains.'
         );
+      });
+
+      it('should return a result with custom data', async () => {
+        interface CustomData {
+          index: number;
+          otherString: string;
+        }
+        const customData: AddDataProps[] = data.map((datum, idx) => ({
+          string: datum,
+          custom: {
+            index: idx,
+            otherString: idx.toString(),
+          },
+        }));
+        await markov.addData(customData);
+
+        const promises = [...Array(10)].map(async () => {
+          const sentence = await markov.generate<CustomData>({ maxTries: 20 });
+          expect(sentence.tries).toBeLessThanOrEqual(20);
+          sentence.refs.forEach((ref) => {
+            expect(ref.custom.index).toBeGreaterThanOrEqual(0);
+            expect(ref.custom.otherString).toMatch(/\d+/);
+          });
+        });
+        await Promise.all(promises);
       });
     });
 

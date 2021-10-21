@@ -1,5 +1,13 @@
 /* eslint-disable import/no-cycle */
-import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, ManyToOne, Index, OneToMany } from 'typeorm';
+import {
+  Entity,
+  BaseEntity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  Index,
+  OneToMany,
+} from 'typeorm';
 import { CorpusEntry } from './CorpusEntry';
 import { MarkovInputData } from './MarkovInputData';
 import { MarkovRoot } from './MarkovRoot';
@@ -17,11 +25,11 @@ export class MarkovFragment extends BaseEntity {
   refs: MarkovInputData[];
 
   @ManyToOne(() => MarkovRoot, { nullable: true })
-  startWordMarkov?: MarkovRoot
+  startWordMarkov?: MarkovRoot;
 
   @ManyToOne(() => MarkovRoot, { nullable: true })
-  endWordMarkov?: MarkovRoot
+  endWordMarkov?: MarkovRoot;
 
   @ManyToOne(() => CorpusEntry, { nullable: true })
-  corpusEntry?: CorpusEntry
+  corpusEntry?: CorpusEntry;
 }

@@ -1,5 +1,12 @@
 /* eslint-disable import/no-cycle */
-import { Entity, BaseEntity, OneToOne, PrimaryGeneratedColumn, OneToMany, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  BaseEntity,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  JoinColumn,
+} from 'typeorm';
 import { CorpusEntry } from './CorpusEntry';
 import { MarkovFragment } from './MarkovFragment';
 import { MarkovOptions } from './MarkovOptions';

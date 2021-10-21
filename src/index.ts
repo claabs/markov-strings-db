@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-await-in-loop */
-import { assignIn, flatten, isString, slice, uniqBy } from 'lodash';
-import { Connection, ConnectionOptions, createConnection } from 'typeorm';
+import { assignIn, isString, slice } from 'lodash';
+import { Connection, ConnectionOptions, createConnection, getConnectionOptions, In } from 'typeorm';
 import { CorpusEntry } from './entity/CorpusEntry';
 import { MarkovFragment } from './entity/MarkovFragment';
 import { MarkovInputData } from './entity/MarkovInputData';
@@ -29,29 +30,22 @@ export type MarkovDataMembers = {
 
 export interface AddDataProps {
   string: string;
-  custom?: Record<string, boolean | string | number>;
+  custom?: any;
 }
 
-export interface MarkovResult {
+export interface MarkovResult<CustomData = never> {
   string: string;
   score: number;
-  refs: MarkovInputData[];
+  refs: MarkovInputData<CustomData>[];
   tries: number;
 }
 
-export type MarkovGenerateOptions = {
+export type MarkovGenerateOptions<CustomData> = {
   maxTries?: number;
-  filter?: (result: MarkovResult) => boolean;
+  filter?: (result: MarkovResult<CustomData>) => boolean;
 };
 
 export type Corpus = { [key: string]: MarkovFragment[] };
-
-export type MarkovImportExport = {
-  corpus: Corpus;
-  startWords: MarkovFragment[];
-  endWords: MarkovFragment[];
-  options: MarkovDataMembers;
-};
 
 export default class Markov {
   // public data: MarkovInputData
@@ -84,11 +78,17 @@ export default class Markov {
   }
 
   public async connect(connectionOptions?: ConnectionOptions): Promise<Connection> {
+    let baseConnectionOpts: ConnectionOptions;
     if (connectionOptions) {
-      this.connection = await createConnection(connectionOptions);
+      baseConnectionOpts = connectionOptions;
     } else {
-      this.connection = await createConnection();
+      baseConnectionOpts = await getConnectionOptions();
     }
+    this.connection = await createConnection({
+      ...baseConnectionOpts,
+      entities: [CorpusEntry, MarkovRoot, MarkovOptions, MarkovInputData, MarkovFragment],
+    });
+
     let db = await MarkovRoot.findOne({
       id: this.id,
     });
@@ -130,29 +130,39 @@ export default class Markov {
     return fragment;
   }
 
-  // /**
-  //  * Imports a corpus. This overwrites existing data.
-  //  *
-  //  * @param data
-  //  */
-  // public import(data: MarkovImportExport): void {
-  //   this.options = cloneDeep(data.options)
-  //   this.corpus = cloneDeep(data.corpus)
-  //   this.startWords = cloneDeep(data.startWords)
-  //   this.endWords = cloneDeep(data.endWords)
-  // }
+  /**
+   * Imports a corpus. This overwrites existing data.
+   *
+   * @param data
+   */
+  public async import(data: MarkovRoot): Promise<void> {
+    const db = await MarkovRoot.preload(data);
+    if (!db) throw new Error('Invalid import object');
+    this.db = db;
+    this.id = db.id;
+    this.options = db.options;
+  }
 
-  // /**
-  //  * Exports structed data used to generate sentence.
-  //  */
-  // public export(): MarkovImportExport {
-  //   return cloneDeep({
-  //     options: this.options,
-  //     corpus: this.corpus,
-  //     startWords: this.startWords,
-  //     endWords: this.endWords
-  //   })
-  // }
+  /**
+   * Exports structed data used to generate sentence.
+   */
+  public async export(): Promise<MarkovRoot> {
+    const db = await MarkovRoot.findOneOrFail({
+      where: { id: this.id },
+      relations: [
+        'corpus',
+        'corpus.fragments',
+        'corpus.fragments.refs',
+        'startWords',
+        'startWords.refs',
+        'endWords',
+        'endWords.refs',
+        'options',
+      ],
+      loadEagerRelations: true,
+    });
+    return db;
+  }
 
   public async addData(rawData: AddDataProps[] | string[]) {
     // Format data if necessary
@@ -312,7 +322,9 @@ export default class Markov {
    * @returns {MarkovResult}
    * @memberof Markov
    */
-  public async generate(options: MarkovGenerateOptions = {}): Promise<MarkovResult> {
+  public async generate<CustomData = any>(
+    options: MarkovGenerateOptions<CustomData> = {}
+  ): Promise<MarkovResult<CustomData>> {
     // const corpusSize = await CorpusEntry.count({markov: this.db});
     const corpusSize = await CorpusEntry.count({ markov: this.db });
     if (corpusSize <= 0) {
@@ -369,10 +381,14 @@ export default class Markov {
         .join(' ')
         .trim();
 
+      const refs = await MarkovInputData.find<MarkovInputData<CustomData>>({
+        fragment: { id: In(arr.map((f) => f.id)) },
+      });
+
       const result = {
         string: sentence,
         score,
-        refs: uniqBy(flatten(arr.map((o) => o.refs)), 'string'),
+        refs,
         tries,
       };
 

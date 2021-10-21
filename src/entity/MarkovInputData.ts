@@ -1,17 +1,17 @@
-/* eslint-disable import/no-cycle */
+/* eslint-disable import/no-cycle, @typescript-eslint/no-explicit-any */
 import { BaseEntity, Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { MarkovFragment } from './MarkovFragment';
 
 @Entity()
-export class MarkovInputData extends BaseEntity {
+export class MarkovInputData<CustomData = any> extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: string;
 
   @Column()
   string: string;
 
-  @Column("simple-json", { nullable: true })
-  custom?: Record<string, boolean | string | number>;
+  @Column('simple-json', { nullable: true })
+  custom: CustomData;
 
   @ManyToOne(() => MarkovFragment, { nullable: true })
   fragment: MarkovFragment;
