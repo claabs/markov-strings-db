@@ -1,4 +1,4 @@
-import { writeJSON } from 'fs-extra';
+import { writeJSON, outputJSON } from 'fs-extra';
 import Markov, { AddDataProps, MarkovResult } from '../src/index';
 import { CorpusEntry } from '../src/entity/CorpusEntry';
 import { MarkovFragment } from '../src/entity/MarkovFragment';
@@ -162,7 +162,7 @@ describe('Markov class', () => {
       it('should clone the original database values', async () => {
         const exported = await markov.export();
 
-        await writeJSON('test-output/export.json', JSON.stringify(exported));
+        await outputJSON('test-output/export.json', JSON.stringify(exported));
 
         expect(exported).toBeDefined();
 
