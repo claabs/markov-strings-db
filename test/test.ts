@@ -1,5 +1,5 @@
-import { mkdir, writeFile, stat } from 'fs/promises';
-import Markov, { AddDataProps, MarkovResult } from '../src';
+import { promises as fs } from 'fs';
+import Markov, { AddDataProps, MarkovResult } from '../src/index';
 import { CorpusEntry } from '../src/entity/CorpusEntry';
 import { MarkovFragment } from '../src/entity/MarkovFragment';
 
@@ -162,10 +162,10 @@ describe('Markov class', () => {
       it('should clone the original database values', async () => {
         const exported = await markov.export();
 
-        if (!(await stat('test-output'))) {
-          await mkdir('test-output');
+        if (!(await fs.stat('test-output'))) {
+          await fs.mkdir('test-output');
         }
-        await writeFile('test-output/export.json', JSON.stringify(exported));
+        await fs.writeFile('test-output/export.json', JSON.stringify(exported));
 
         expect(exported).toBeDefined();
 
@@ -184,7 +184,7 @@ describe('Markov class', () => {
     });
 
     describe('Import data', () => {
-      it('should overwrite original values', async () => {
+      it.skip('should overwrite original values', async () => {
         const exported = await markov.export();
 
         // Clear database

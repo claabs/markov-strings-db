@@ -20,7 +20,10 @@ module.exports = {
     'import/prefer-default-export': 0,
     'no-shadow': 'off',
     '@typescript-eslint/no-shadow': ['error'],
-    'import/no-extraneous-dependencies': ['error', { devDependencies: ['**/*.spec.ts'] }]
+    'import/no-extraneous-dependencies': ['error', { devDependencies: ['**/*.spec.ts'] }],
+    'import/named': 0,
+    'import/no-named-as-default': 0,
+    'import/no-named-as-default-member': 0,
   },
   settings: {
     'import/extensions': ['.js', '.ts',],
@@ -31,7 +34,7 @@ module.exports = {
       node: {
         extensions: ['.js', '.ts',]
       }
-    }
+    },
   },
   ignorePatterns: ['dist/**', '.eslintrc.js', 'jest.config.js']
 }
