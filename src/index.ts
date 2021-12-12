@@ -7,6 +7,10 @@ import { MarkovFragment } from './entity/MarkovFragment';
 import { MarkovInputData } from './entity/MarkovInputData';
 import { MarkovOptions } from './entity/MarkovOptions';
 import { MarkovRoot } from './entity/MarkovRoot';
+import {
+  MarkovImportExport as MarkovV3ImportExport,
+  MarkovFragment as MarkovV3Fragment,
+} from './v3-types';
 
 /**
  * Data to build the Markov instance
@@ -130,17 +134,71 @@ export default class Markov {
     return fragment;
   }
 
+  private async importFragments(importFragments: MarkovV3Fragment[]): Promise<MarkovFragment[]> {
+    const refs: MarkovInputData[] = [];
+    const fragments = importFragments.map((importFragment) => {
+      const fragment = new MarkovFragment();
+      fragment.startWordMarkov = this.db;
+      fragment.words = importFragment.words;
+      // Push refs to array so we can save them all at once later
+      refs.push(
+        ...importFragment.refs.map((ref) => {
+          const customData: Record<string, any> = ref;
+          delete customData.string; // Only keep custom data
+          const markovInputData = new MarkovInputData();
+          markovInputData.fragment = fragment;
+          markovInputData.string = ref.string;
+          markovInputData.custom = customData;
+          return markovInputData;
+        })
+      );
+      return fragment;
+    });
+    await MarkovInputData.save(refs);
+    await MarkovFragment.save(fragments);
+    return fragments;
+  }
+
   /**
    * Imports a corpus. This overwrites existing data.
    *
    * @param data
    */
-  public async import(data: MarkovRoot): Promise<void> {
-    const db = await MarkovRoot.preload(data);
-    if (!db) throw new Error('Invalid import object');
-    this.db = db;
-    this.id = db.id;
-    this.options = db.options;
+  public async import(data: MarkovRoot | MarkovV3ImportExport): Promise<void> {
+    if ('id' in data) {
+      const db = await MarkovRoot.preload(data);
+      if (!db) throw new Error('Invalid import object');
+      this.db = db;
+      this.id = db.id;
+      this.options = db.options;
+    } else {
+      // Legacy import
+      this.db = new MarkovRoot();
+      const options = new MarkovOptions();
+      options.stateSize = data.options.stateSize;
+      options.markov = this.db;
+      await MarkovOptions.save(options);
+
+      const startWords = await this.importFragments(data.startWords);
+      const endWords = await this.importFragments(data.endWords);
+
+      const corpus = await Promise.all(
+        Object.entries(data.corpus).map(async ([key, fragments]) => {
+          const corpusEntry = new CorpusEntry();
+          corpusEntry.markov = this.db;
+          corpusEntry.block = key;
+          corpusEntry.fragments = await this.importFragments(fragments);
+          return corpusEntry;
+        })
+      );
+
+      this.db.id = this.id;
+      this.db.options = options;
+      this.db.startWords = startWords;
+      this.db.endWords = endWords;
+      this.db.corpus = corpus;
+    }
+    await MarkovRoot.save(this.db);
   }
 
   /**
