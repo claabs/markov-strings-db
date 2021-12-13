@@ -1,0 +1,428 @@
+{
+    "options": {
+        "stateSize": 2
+    },
+    "corpus": {
+        "Lorem ipsum": [
+            {
+                "words": "dolor sit",
+                "refs": [
+                    {
+                        "string": "Lorem ipsum dolor sit amet"
+                    }
+                ]
+            },
+            {
+                "words": "duplicate start",
+                "refs": [
+                    {
+                        "string": "Lorem ipsum duplicate start words"
+                    }
+                ]
+            }
+        ],
+        "ipsum dolor": [
+            {
+                "words": "sit amet",
+                "refs": [
+                    {
+                        "string": "Lorem ipsum dolor sit amet"
+                    }
+                ]
+            }
+        ],
+        "ipsum duplicate": [
+            {
+                "words": "start words",
+                "refs": [
+                    {
+                        "string": "Lorem ipsum duplicate start words"
+                    }
+                ]
+            }
+        ],
+        "Quisque tempor,": [
+            {
+                "words": "erat vel",
+                "refs": [
+                    {
+                        "string": "Quisque tempor, erat vel lacinia imperdiet"
+                    }
+                ]
+            }
+        ],
+        "tempor, erat": [
+            {
+                "words": "vel lacinia",
+                "refs": [
+                    {
+                        "string": "Quisque tempor, erat vel lacinia imperdiet"
+                    },
+                    {
+                        "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet"
+                    }
+                ]
+            }
+        ],
+        "erat vel": [
+            {
+                "words": "lacinia imperdiet",
+                "refs": [
+                    {
+                        "string": "Quisque tempor, erat vel lacinia imperdiet"
+                    }
+                ]
+            },
+            {
+                "words": "lacinia vel",
+                "refs": [
+                    {
+                        "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet"
+                    }
+                ]
+            }
+        ],
+        "Justo nisi": [
+            {
+                "words": "fringilla dui",
+                "refs": [
+                    {
+                        "string": "Justo nisi fringilla dui"
+                    }
+                ]
+            }
+        ],
+        "Egestas bibendum": [
+            {
+                "words": "eros nisi",
+                "refs": [
+                    {
+                        "string": "Egestas bibendum eros nisi ut lacus"
+                    }
+                ]
+            }
+        ],
+        "bibendum eros": [
+            {
+                "words": "nisi ut",
+                "refs": [
+                    {
+                        "string": "Egestas bibendum eros nisi ut lacus"
+                    }
+                ]
+            }
+        ],
+        "eros nisi": [
+            {
+                "words": "ut lacus",
+                "refs": [
+                    {
+                        "string": "Egestas bibendum eros nisi ut lacus"
+                    }
+                ]
+            }
+        ],
+        "fringilla dui": [
+            {
+                "words": "avait annoncé",
+                "refs": [
+                    {
+                        "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…"
+                    }
+                ]
+            }
+        ],
+        "dui avait": [
+            {
+                "words": "annoncé une",
+                "refs": [
+                    {
+                        "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…"
+                    }
+                ]
+            }
+        ],
+        "avait annoncé": [
+            {
+                "words": "une rupture",
+                "refs": [
+                    {
+                        "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…"
+                    }
+                ]
+            }
+        ],
+        "annoncé une": [
+            {
+                "words": "rupture avec",
+                "refs": [
+                    {
+                        "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…"
+                    }
+                ]
+            }
+        ],
+        "une rupture": [
+            {
+                "words": "avec le",
+                "refs": [
+                    {
+                        "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…"
+                    }
+                ]
+            }
+        ],
+        "rupture avec": [
+            {
+                "words": "le erat",
+                "refs": [
+                    {
+                        "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…"
+                    }
+                ]
+            }
+        ],
+        "avec le": [
+            {
+                "words": "erat vel:",
+                "refs": [
+                    {
+                        "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…"
+                    }
+                ]
+            }
+        ],
+        "le erat": [
+            {
+                "words": "vel: il",
+                "refs": [
+                    {
+                        "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…"
+                    }
+                ]
+            }
+        ],
+        "erat vel:": [
+            {
+                "words": "il n'en",
+                "refs": [
+                    {
+                        "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…"
+                    }
+                ]
+            }
+        ],
+        "vel: il": [
+            {
+                "words": "n'en est",
+                "refs": [
+                    {
+                        "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…"
+                    }
+                ]
+            }
+        ],
+        "il n'en": [
+            {
+                "words": "est rien…",
+                "refs": [
+                    {
+                        "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…"
+                    }
+                ]
+            }
+        ],
+        "Fusce tincidunt": [
+            {
+                "words": "tempor, erat",
+                "refs": [
+                    {
+                        "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet"
+                    }
+                ]
+            }
+        ],
+        "tincidunt tempor,": [
+            {
+                "words": "erat vel",
+                "refs": [
+                    {
+                        "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet"
+                    }
+                ]
+            }
+        ],
+        "vel lacinia": [
+            {
+                "words": "vel ex",
+                "refs": [
+                    {
+                        "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet"
+                    }
+                ]
+            }
+        ],
+        "lacinia vel": [
+            {
+                "words": "ex pharetra",
+                "refs": [
+                    {
+                        "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet"
+                    }
+                ]
+            }
+        ],
+        "vel ex": [
+            {
+                "words": "pharetra pretium",
+                "refs": [
+                    {
+                        "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet"
+                    }
+                ]
+            }
+        ],
+        "ex pharetra": [
+            {
+                "words": "pretium lacinia",
+                "refs": [
+                    {
+                        "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet"
+                    }
+                ]
+            }
+        ],
+        "pharetra pretium": [
+            {
+                "words": "lacinia imperdiet",
+                "refs": [
+                    {
+                        "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet"
+                    }
+                ]
+            }
+        ]
+    },
+    "startWords": [
+        {
+            "words": "Lorem ipsum",
+            "refs": [
+                {
+                    "string": "Lorem ipsum dolor sit amet"
+                },
+                {
+                    "string": "Lorem ipsum duplicate start words"
+                }
+            ]
+        },
+        {
+            "words": "Consectetur adipiscing",
+            "refs": [
+                {
+                    "string": "Consectetur adipiscing elit"
+                }
+            ]
+        },
+        {
+            "words": "Quisque tempor,",
+            "refs": [
+                {
+                    "string": "Quisque tempor, erat vel lacinia imperdiet"
+                }
+            ]
+        },
+        {
+            "words": "Justo nisi",
+            "refs": [
+                {
+                    "string": "Justo nisi fringilla dui"
+                }
+            ]
+        },
+        {
+            "words": "Egestas bibendum",
+            "refs": [
+                {
+                    "string": "Egestas bibendum eros nisi ut lacus"
+                }
+            ]
+        },
+        {
+            "words": "fringilla dui",
+            "refs": [
+                {
+                    "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…"
+                }
+            ]
+        },
+        {
+            "words": "Fusce tincidunt",
+            "refs": [
+                {
+                    "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet"
+                }
+            ]
+        }
+    ],
+    "endWords": [
+        {
+            "words": "sit amet",
+            "refs": [
+                {
+                    "string": "Lorem ipsum dolor sit amet"
+                }
+            ]
+        },
+        {
+            "words": "start words",
+            "refs": [
+                {
+                    "string": "Lorem ipsum duplicate start words"
+                }
+            ]
+        },
+        {
+            "words": "adipiscing elit",
+            "refs": [
+                {
+                    "string": "Consectetur adipiscing elit"
+                }
+            ]
+        },
+        {
+            "words": "lacinia imperdiet",
+            "refs": [
+                {
+                    "string": "Quisque tempor, erat vel lacinia imperdiet"
+                },
+                {
+                    "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet"
+                }
+            ]
+        },
+        {
+            "words": "fringilla dui",
+            "refs": [
+                {
+                    "string": "Justo nisi fringilla dui"
+                }
+            ]
+        },
+        {
+            "words": "ut lacus",
+            "refs": [
+                {
+                    "string": "Egestas bibendum eros nisi ut lacus"
+                }
+            ]
+        },
+        {
+            "words": "est rien…",
+            "refs": [
+                {
+                    "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…"
+                }
+            ]
+        }
+    ]
+}

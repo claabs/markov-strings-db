@@ -1,4 +1,5 @@
-import { writeJSON, outputJSON } from 'fs-extra';
+import { readJSONSync } from 'fs-extra';
+import path from 'path';
 import Markov, { AddDataProps, MarkovResult } from '../src/index';
 import { CorpusEntry } from '../src/entity/CorpusEntry';
 import { MarkovFragment } from '../src/entity/MarkovFragment';
@@ -162,28 +163,14 @@ describe('Markov class', () => {
       it('should clone the original database values', async () => {
         const exported = await markov.export();
 
-        await outputJSON('test-output/export.json', JSON.stringify(exported));
+        const v4Import = readJSONSync(path.join(__dirname, 'v4-export.json'));
 
-        expect(exported).toBeDefined();
-
-        // expect(exported.corpus).toEqual(markov.corpus);
-        // expect(exported.corpus).not.toBe(markov.corpus);
-
-        // expect(exported.startWords).not.toBe(markov.startWords);
-        // expect(exported.startWords).toEqual(markov.startWords);
-
-        // expect(exported.endWords).not.toBe(markov.endWords);
-        // expect(exported.endWords).toEqual(markov.endWords);
-
-        // expect(exported.options).toEqual(markov.options);
-        // expect(exported.options).not.toBe(markov.options);
+        expect(exported).toMatchObject(v4Import);
       });
     });
 
-    describe('Import data', () => {
-      it.skip('should overwrite original values', async () => {
-        const exported = await markov.export();
-
+    describe('Import v3 data', () => {
+      it('onto fresh DB', async () => {
         // Clear database
         await markov.connection.dropDatabase();
         await markov.disconnect();
@@ -194,14 +181,27 @@ describe('Markov class', () => {
         });
         expect(count).toEqual(0);
 
-        await markov.import(exported);
+        const v3Import = readJSONSync(path.join(__dirname, 'v3-export.json'));
+        await markov.import(v3Import);
 
         count = await CorpusEntry.count({
           markov: markov.db,
         });
-        expect(count).not.toEqual(0);
+        expect(count).toEqual(28);
 
-        // Make sure that the corpus is empty
+        // Should still generate a sentence
+        const sentence = await markov.generate({ maxTries: 20 });
+        expect(sentence.tries).toBeLessThanOrEqual(20);
+      });
+
+      it('should not overwrite original values', async () => {
+        const v3Import = readJSONSync(path.join(__dirname, 'v3-export.json'));
+        await markov.import(v3Import);
+
+        const count = await CorpusEntry.count({
+          markov: markov.db,
+        });
+        expect(count).toEqual(56);
       });
     });
   });
