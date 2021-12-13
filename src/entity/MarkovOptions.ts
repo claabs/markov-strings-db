@@ -1,7 +1,6 @@
 /* eslint-disable import/no-cycle */
-import {  Entity,  BaseEntity,  PrimaryGeneratedColumn,  Column, OneToOne } from 'typeorm';
+import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, OneToOne } from 'typeorm';
 import { MarkovRoot } from './MarkovRoot';
-
 
 @Entity()
 export class MarkovOptions extends BaseEntity {
@@ -12,5 +11,5 @@ export class MarkovOptions extends BaseEntity {
   stateSize: number;
 
   @OneToOne(() => MarkovRoot)
-  markov: MarkovRoot
+  markov: MarkovRoot;
 }
