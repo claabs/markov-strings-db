@@ -1,4 +1,4 @@
-import { readJSONSync } from 'fs-extra';
+import { outputJSONSync, readJSONSync } from 'fs-extra';
 import path from 'path';
 import Markov, { AddDataProps, MarkovResult } from '../src/index';
 import { CorpusEntry } from '../src/entity/CorpusEntry';
@@ -158,22 +158,29 @@ describe('Markov class', () => {
         await Promise.all(promises);
       });
     });
+  });
 
-    describe('Export data', () => {
-      it('should clone the original database values', async () => {
-        const exported = await markov.export();
+  describe('Import/Export', () => {
+    let markov: Markov;
+    afterEach(async () => {
+      await markov.connection.dropDatabase();
+      await markov.disconnect();
+    });
 
-        const v4Import = readJSONSync(path.join(__dirname, 'v4-export.json'));
+    it('should export the original database values', async () => {
+      markov = new Markov();
+      await markov.connect();
+      await markov.addData(data);
 
-        expect(exported).toMatchObject(v4Import);
-      });
+      const exported = await markov.export();
+
+      const v4Import = readJSONSync(path.join(__dirname, 'v4-export.json'));
+
+      expect(exported).toMatchObject(v4Import);
     });
 
     describe('Import v3 data', () => {
       it('onto fresh DB', async () => {
-        // Clear database
-        await markov.connection.dropDatabase();
-        await markov.disconnect();
         markov = new Markov();
         await markov.connect();
         let count = await CorpusEntry.count({
@@ -194,14 +201,50 @@ describe('Markov class', () => {
         expect(sentence.tries).toBeLessThanOrEqual(20);
       });
 
-      it('should not overwrite original values', async () => {
+      it('should overwrite original values', async () => {
+        markov = new Markov();
+        await markov.connect();
+        await markov.addData(data);
+
         const v3Import = readJSONSync(path.join(__dirname, 'v3-export.json'));
         await markov.import(v3Import);
 
         const count = await CorpusEntry.count({
           markov: markov.db,
         });
-        expect(count).toEqual(56);
+        expect(count).toEqual(28);
+      });
+    });
+
+    describe('Import v4 data', () => {
+      it('onto fresh DB', async () => {
+        markov = new Markov();
+        await markov.connect();
+        let count = await CorpusEntry.count({
+          markov: markov.db,
+        });
+        expect(count).toEqual(0);
+
+        const v4Import = readJSONSync(path.join(__dirname, 'v4-export.json'));
+        await markov.import(v4Import);
+
+        count = await CorpusEntry.count({
+          markov: markov.db,
+        });
+        expect(count).toEqual(28);
+
+        // Should still generate a sentence
+        const sentence = await markov.generate({ maxTries: 20 });
+        expect(sentence.tries).toBeLessThanOrEqual(20);
+      });
+
+      it('should fail to overwrite existing records', async () => {
+        markov = new Markov();
+        await markov.connect();
+        await markov.addData(data);
+
+        const v4Import = readJSONSync(path.join(__dirname, 'v4-export.json'));
+        await expect(markov.import(v4Import)).rejects.toThrow();
       });
     });
   });
