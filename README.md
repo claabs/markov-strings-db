@@ -1,10 +1,6 @@
-[![Build Status](https://travis-ci.org/scambier/markov-strings.svg?branch=master)](https://travis-ci.org/scambier/markov-strings)
-[![Coverage Status](https://coveralls.io/repos/github/scambier/markov-strings/badge.svg?branch=master)](https://coveralls.io/github/scambier/markov-strings?branch=master)
-[![npm version](https://badge.fury.io/js/markov-strings.svg)](https://badge.fury.io/js/markov-strings) [![dep](https://david-dm.org/scambier/markov-strings.svg)](https://david-dm.org/scambier/markov-strings#info=devDependencies)
-
-[![Inactively Maintained](https://img.shields.io/badge/Maintenance%20Level-Inactively%20Maintained-yellowgreen.svg)](https://gist.github.com/cheerfulstoic/d107229326a01ff0f333a1d3476e068d)
-
-
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/claabs/markov-strings-db/Unit%20test%20and%20build)
+[![Coverage Status](https://coveralls.io/repos/github/claabs/markov-strings-db/badge.svg?branch=master)](https://coveralls.io/github/claabs/markov-strings-db?branch=master)
+![npm](https://img.shields.io/npm/v/markov-strings-db)
 
 ---
 ! This is the readme for markov-strings **3.x.x.** - The docs for the older **2.x.x** are [here](https://github.com/scambier/markov-strings/tree/v2) !
