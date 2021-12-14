@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-await-in-loop */
 import { assignIn, isString, slice } from 'lodash';
 import { Connection, ConnectionOptions, createConnection, getConnectionOptions, In } from 'typeorm';
@@ -33,6 +32,7 @@ export type MarkovDataMembers = {
 
 export interface AddDataProps {
   string: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   custom?: any;
 }
 
@@ -51,7 +51,6 @@ export type MarkovGenerateOptions<CustomData> = {
 export type Corpus = { [key: string]: MarkovFragment[] };
 
 export default class Markov {
-  // public data: MarkovInputData
   public db: MarkovRoot;
 
   public options: MarkovOptions | MarkovDataMembers;
@@ -66,9 +65,6 @@ export default class Markov {
 
   /**
    * Creates an instance of Markov generator.
-   *
-   * @param {MarkovConstructorProps} [options={}]
-   * @memberof Markov
    */
   constructor(props?: MarkovConstructorProps) {
     // this.data = []
@@ -114,13 +110,13 @@ export default class Markov {
     }
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  private async sampleFragment(
-    condition: MarkovRoot | CorpusEntry
-  ): Promise<MarkovFragment | undefined> {
+  /**
+   * Gets a random fragment for a startWord or corpusEntry from the database.
+   */
+  private async sampleFragment(condition?: CorpusEntry): Promise<MarkovFragment | undefined> {
     let queryCondition;
-    if (condition instanceof MarkovRoot) {
-      queryCondition = { startWordMarkov: condition };
+    if (!condition) {
+      queryCondition = { startWordMarkov: this.db };
     } else {
       queryCondition = { corpusEntry: condition };
     }
@@ -134,7 +130,6 @@ export default class Markov {
 
   /**
    * Imports a corpus. This overwrites existing data
-   * @param data
    */
   public async import(data: MarkovRoot | MarkovV3ImportExport): Promise<void> {
     if ('id' in data) {
@@ -199,6 +194,10 @@ export default class Markov {
     return db;
   }
 
+  /**
+   * To function correctly, the Markov generator needs its internal data to be correctly structured. This allows you add raw data, that is automatically formatted to fit the internal structure.
+   * You can call this as often as you need, with new data each time. Multiple calls with the same data is not recommended, because it will skew the random generation of results.
+   */
   public async addData(rawData: AddDataProps[] | string[]) {
     // Format data if necessary
     let input: AddDataProps[] = [];
@@ -217,8 +216,6 @@ export default class Markov {
 
   /**
    * Builds the corpus. You must call this before generating sentences.
-   *
-   * @memberof Markov
    */
   private async buildCorpus(data: AddDataProps[]): Promise<void> {
     const { options } = this.db;
@@ -352,11 +349,8 @@ export default class Markov {
 
   /**
    * Generates a result, that contains a string and its references
-   *
-   * @param {MarkovGenerateOptions} [options={}]
-   * @returns {MarkovResult}
-   * @memberof Markov
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async generate<CustomData = any>(
     options: MarkovGenerateOptions<CustomData> = {}
   ): Promise<MarkovResult<CustomData>> {
@@ -379,7 +373,12 @@ export default class Markov {
 
       // Create an array of MarkovCorpusItems
       // The first item is a random startWords element
-      const arr = [(await this.sampleFragment(this.db))!];
+      const firstSample = await this.sampleFragment();
+      if (!firstSample)
+        throw new Error(
+          'Could not get a random fragment. There is either no data, or the data is not sufficient to create markov chains.'
+        );
+      const arr = [firstSample];
 
       let score = 0;
 

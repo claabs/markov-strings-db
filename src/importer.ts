@@ -121,6 +121,7 @@ export class Importer {
       // Push refs to array so we can save them all at once later
       const refs = importFragment.refs.map((ref) => {
         const { string } = ref; // Save string as the following delete will delete ref.string as well
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const customData: Record<string, any> = ref;
         delete customData.string; // Only keep custom data
         const markovInputData = new MarkovInputData();
