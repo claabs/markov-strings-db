@@ -1,5 +1,5 @@
-import { readJSONSync } from 'fs-extra';
 import path from 'path';
+import { readFileSync } from 'fs';
 import Markov, { AddDataProps, MarkovResult } from '../src/index';
 import { CorpusEntry } from '../src/entity/CorpusEntry';
 import { MarkovFragment } from '../src/entity/MarkovFragment';
@@ -174,7 +174,7 @@ describe('Markov class', () => {
 
       const exported = await markov.export();
 
-      const v4Import = readJSONSync(path.join(__dirname, 'v4-export.json'));
+      const v4Import = JSON.parse(readFileSync(path.join(__dirname, 'v4-export.json'), 'utf8'));
 
       expect(exported).toMatchObject(v4Import);
     });
@@ -188,7 +188,7 @@ describe('Markov class', () => {
         });
         expect(count).toEqual(0);
 
-        const v3Import = readJSONSync(path.join(__dirname, 'v3-export.json'));
+        const v3Import = JSON.parse(readFileSync(path.join(__dirname, 'v3-export.json'), 'utf8'));
         await markov.import(v3Import);
 
         count = await CorpusEntry.count({
@@ -206,7 +206,7 @@ describe('Markov class', () => {
         await markov.connect();
         await markov.addData(data);
 
-        const v3Import = readJSONSync(path.join(__dirname, 'v3-export.json'));
+        const v3Import = JSON.parse(readFileSync(path.join(__dirname, 'v3-export.json'), 'utf8'));
         await markov.import(v3Import);
 
         const count = await CorpusEntry.count({
@@ -225,7 +225,7 @@ describe('Markov class', () => {
         });
         expect(count).toEqual(0);
 
-        const v4Import = readJSONSync(path.join(__dirname, 'v4-export.json'));
+        const v4Import = JSON.parse(readFileSync(path.join(__dirname, 'v4-export.json'), 'utf8'));
         await markov.import(v4Import);
 
         count = await CorpusEntry.count({
@@ -243,7 +243,7 @@ describe('Markov class', () => {
         await markov.connect();
         await markov.addData(data);
 
-        const v4Import = readJSONSync(path.join(__dirname, 'v4-export.json'));
+        const v4Import = JSON.parse(readFileSync(path.join(__dirname, 'v4-export.json'), 'utf8'));
         await markov.import(v4Import);
 
         const count = await CorpusEntry.count({
