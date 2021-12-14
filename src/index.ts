@@ -1,5 +1,4 @@
 /* eslint-disable no-await-in-loop */
-import { assignIn, isString, slice } from 'lodash';
 import { Connection, ConnectionOptions, createConnection, getConnectionOptions, In } from 'typeorm';
 import { CorpusEntry } from './entity/CorpusEntry';
 import { MarkovFragment } from './entity/MarkovFragment';
@@ -72,7 +71,7 @@ export default class Markov {
     this.id = props?.id || '1';
 
     // Save options
-    this.options = assignIn(this.defaultOptions, props?.options);
+    this.options = Object.assign(this.defaultOptions, props?.options);
   }
 
   public async connect(connectionOptions?: ConnectionOptions): Promise<Connection> {
@@ -201,7 +200,7 @@ export default class Markov {
   public async addData(rawData: AddDataProps[] | string[]) {
     // Format data if necessary
     let input: AddDataProps[] = [];
-    if (isString(rawData[0])) {
+    if (typeof rawData[0] === 'string') {
       input = (rawData as string[]).map((s) => ({ string: s }));
     } else if (Object.hasOwnProperty.call(rawData[0], 'string')) {
       input = rawData as AddDataProps[];
@@ -230,7 +229,7 @@ export default class Markov {
       // #region Start words
       // "Start words" is the list of words that can start a generated chain.
 
-      const start = slice(words, 0, stateSize).join(' ');
+      const start = words.slice(0, stateSize).join(' ');
       const oldStartObj = await MarkovFragment.findOne({ startWordMarkov: this.db, words: start });
 
       // If we already have identical startWords
@@ -262,7 +261,7 @@ export default class Markov {
       // #region End words
       // "End words" is the list of words that can end a generated chain.
 
-      const end = slice(words, words.length - stateSize, words.length).join(' ');
+      const end = words.slice(words.length - stateSize, words.length).join(' ');
       const oldEndObj = await MarkovFragment.findOne({ endWordMarkov: this.db, words: end });
       if (oldEndObj) {
         let inputData = await MarkovInputData.findOne({ fragment: oldEndObj });
@@ -294,8 +293,8 @@ export default class Markov {
       // e.g. for a stateSize of 2, "lorem ipsum dolor sit amet" will have the following blocks:
       //    "lorem ipsum", "ipsum dolor", "dolor sit", and "sit amet"
       for (let i = 0; i < words.length - 1; i += 1) {
-        const curr = slice(words, i, i + stateSize).join(' ');
-        const next = slice(words, i + stateSize, i + stateSize * 2).join(' ');
+        const curr = words.slice(i, i + stateSize).join(' ');
+        const next = words.slice(i + stateSize, i + stateSize * 2).join(' ');
         if (!next || next.split(' ').length !== options.stateSize) {
           // eslint-disable-next-line no-continue
           continue;
