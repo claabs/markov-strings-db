@@ -1,8 +1,9 @@
 {
   "name": "markov-strings-db",
   "version": "4.0.0",
-  "description": "A Markov string generator",
+  "description": "A Markov string generator that utilizes a relational SQL database",
   "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "files": [
     "dist/src"
   ],
@@ -18,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/scambier/markov-strings"
+    "url": "https://github.com/claabs/markov-strings-db"
   },
   "keywords": [
     "markov",
@@ -26,36 +27,38 @@
     "chain",
     "procedural",
     "generation",
-    "text"
+    "text",
+    "sqlite",
+    "sql"
   ],
-  "author": "scambier",
+  "author": "claabs",
   "license": "MIT",
   "devDependencies": {
     "@types/fs-extra": "^9.0.13",
-    "@types/jest": "^27.0.2",
-    "@types/lodash": "^4.14.161",
-    "@types/node": "^14.17.27",
-    "coveralls": "^3.1.0",
+    "@types/jest": "^27.0.3",
+    "@types/lodash": "^4.14.178",
+    "@types/node": "^16.11.12",
+    "better-sqlite3": "^7.4.5",
+    "coveralls": "^3.1.1",
     "fs-extra": "^10.0.0",
-    "jest": "^27.2.5",
+    "jest": "^27.4.5",
     "rimraf": "^3.0.2",
-    "sqlite3": "^5.0.2",
-    "ts-jest": "^27.0.7",
-    "typescript": "^4.4.4"
+    "ts-jest": "^27.1.1",
+    "typescript": "^4.5.4"
   },
   "dependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^8.0.1",
-    "eslint-config-airbnb-base": "^14.2.1",
+    "@typescript-eslint/eslint-plugin": "^5.7.0",
+    "@typescript-eslint/parser": "^5.7.0",
+    "eslint": "^8.4.1",
+    "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-import": "^2.25.2",
-    "eslint-plugin-jest": "^25.2.1",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-jest": "^25.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "lodash": "^4.17.20",
-    "prettier": "^2.4.1",
+    "prettier": "^2.5.1",
     "reflect-metadata": "^0.1.13",
-    "ts-node": "^10.3.1",
+    "ts-node": "^10.4.0",
     "typeorm": "^0.2.41"
   }
 }
