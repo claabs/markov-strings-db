@@ -1,4 +1,4 @@
-import { outputJSONSync, readJSONSync } from 'fs-extra';
+import { readJSONSync } from 'fs-extra';
 import path from 'path';
 import Markov, { AddDataProps, MarkovResult } from '../src/index';
 import { CorpusEntry } from '../src/entity/CorpusEntry';
@@ -41,7 +41,7 @@ describe('Markov class', () => {
       await markov.disconnect();
     });
 
-    it('should build synchronously', async () => {
+    it('should build corpus', async () => {
       let count = await CorpusEntry.count({
         markov: markov.db,
       });
@@ -238,13 +238,18 @@ describe('Markov class', () => {
         expect(sentence.tries).toBeLessThanOrEqual(20);
       });
 
-      it('should fail to overwrite existing records', async () => {
+      it('should overwrite original values', async () => {
         markov = new Markov();
         await markov.connect();
         await markov.addData(data);
 
         const v4Import = readJSONSync(path.join(__dirname, 'v4-export.json'));
-        await expect(markov.import(v4Import)).rejects.toThrow();
+        await markov.import(v4Import);
+
+        const count = await CorpusEntry.count({
+          markov: markov.db,
+        });
+        expect(count).toEqual(28);
       });
     });
   });

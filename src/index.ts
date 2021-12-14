@@ -7,11 +7,8 @@ import { MarkovFragment } from './entity/MarkovFragment';
 import { MarkovInputData } from './entity/MarkovInputData';
 import { MarkovOptions } from './entity/MarkovOptions';
 import { MarkovRoot } from './entity/MarkovRoot';
-import {
-  MarkovImportExport as MarkovV3ImportExport,
-  MarkovFragment as MarkovV3Fragment,
-  Corpus as MarkovV3Corpus,
-} from './v3-types';
+import { Importer } from './importer';
+import { MarkovImportExport as MarkovV3ImportExport } from './v3-types';
 
 /**
  * Data to build the Markov instance
@@ -52,11 +49,6 @@ export type MarkovGenerateOptions<CustomData> = {
 };
 
 export type Corpus = { [key: string]: MarkovFragment[] };
-
-export interface ImportFragmentExtract {
-  refs: MarkovInputData[];
-  fragments: MarkovFragment[];
-}
 
 export default class Markov {
   // public data: MarkovInputData
@@ -140,190 +132,28 @@ export default class Markov {
     return fragment;
   }
 
-  private extractImportFragments(
-    importFragments: MarkovFragment[],
-    foreignKey: 'corpusEntry',
-    corpusEntry: CorpusEntry
-  ): ImportFragmentExtract;
-
-  private extractImportFragments(
-    importFragments: MarkovFragment[],
-    foreignKey: 'startWordMarkov' | 'endWordMarkov'
-  ): ImportFragmentExtract;
-
-  private extractImportFragments(
-    importFragments: MarkovFragment[],
-    foreignKey: 'startWordMarkov' | 'endWordMarkov' | 'corpusEntry',
-    corpusEntry?: CorpusEntry
-  ): ImportFragmentExtract {
-    const allRefs: MarkovInputData[] = [];
-    const fragments = importFragments.map((importFragment) => {
-      const fragment = MarkovFragment.create(importFragment);
-      if (foreignKey === 'corpusEntry') {
-        fragment[foreignKey] = corpusEntry;
-      } else {
-        fragment[foreignKey] = this.db;
-      }
-      const refs = importFragment.refs.map((ref) => {
-        const markovInputData = MarkovInputData.create(ref);
-        markovInputData.fragment = fragment;
-        return markovInputData;
-      });
-      // Push refs to array so we can save them all at once later
-      allRefs.push(...refs);
-      return fragment;
-    });
-    return {
-      refs: allRefs,
-      fragments,
-    };
-  }
-
-  private async saveImportFragments(
-    importFragments: MarkovFragment[],
-    foreignKey: 'startWordMarkov' | 'endWordMarkov'
-  ): Promise<MarkovFragment[]> {
-    const { refs, fragments } = this.extractImportFragments(importFragments, foreignKey);
-
-    await MarkovFragment.save(fragments);
-    await MarkovInputData.save(refs);
-
-    return fragments;
-  }
-
-  private async saveImportCorpus(importCorpus: CorpusEntry[]): Promise<CorpusEntry[]> {
-    const allFragments: MarkovFragment[] = [];
-    const allRefs: MarkovInputData[] = [];
-    const corpusEntries = importCorpus.map((importCorpusEntry) => {
-      const corpusEntry = CorpusEntry.create(importCorpusEntry);
-      const { fragments, refs } = this.extractImportFragments(
-        importCorpusEntry.fragments,
-        'corpusEntry',
-        corpusEntry
-      );
-      allFragments.push(...fragments);
-      allRefs.push(...refs);
-      corpusEntry.markov = this.db;
-      corpusEntry.fragments = fragments;
-      return corpusEntry;
-    });
-
-    await CorpusEntry.save(corpusEntries);
-    await MarkovFragment.save(allFragments);
-    await MarkovInputData.save(allRefs);
-    return corpusEntries;
-  }
-
-  private extractImportV3Fragments(
-    importFragments: MarkovV3Fragment[],
-    foreignKey: 'corpusEntry',
-    corpusEntry: CorpusEntry
-  ): ImportFragmentExtract;
-
-  private extractImportV3Fragments(
-    importFragments: MarkovV3Fragment[],
-    foreignKey: 'startWordMarkov' | 'endWordMarkov'
-  ): ImportFragmentExtract;
-
-  private extractImportV3Fragments(
-    importFragments: MarkovV3Fragment[],
-    foreignKey: 'startWordMarkov' | 'endWordMarkov' | 'corpusEntry',
-    corpusEntry?: CorpusEntry
-  ): ImportFragmentExtract {
-    const allRefs: MarkovInputData[] = [];
-    const fragments = importFragments.map((importFragment) => {
-      const fragment = new MarkovFragment();
-      if (foreignKey === 'corpusEntry') {
-        fragment[foreignKey] = corpusEntry;
-      } else {
-        fragment[foreignKey] = this.db;
-      }
-      fragment.words = importFragment.words;
-      // Push refs to array so we can save them all at once later
-      const refs = importFragment.refs.map((ref) => {
-        const { string } = ref; // Save string as the following delete will delete ref.string as well
-        const customData: Record<string, any> = ref;
-        delete customData.string; // Only keep custom data
-        const markovInputData = new MarkovInputData();
-        markovInputData.fragment = fragment;
-        markovInputData.string = string;
-        if (Object.keys(customData).length) markovInputData.custom = customData;
-        return markovInputData;
-      });
-      allRefs.push(...refs);
-
-      return fragment;
-    });
-    return {
-      refs: allRefs,
-      fragments,
-    };
-  }
-
-  private async saveImportV3Fragments(
-    importFragments: MarkovV3Fragment[],
-    foreignKey: 'startWordMarkov' | 'endWordMarkov'
-  ): Promise<MarkovFragment[]> {
-    const { refs, fragments } = this.extractImportV3Fragments(importFragments, foreignKey);
-
-    await MarkovFragment.save(fragments);
-    await MarkovInputData.save(refs);
-
-    return fragments;
-  }
-
-  private async saveImportV3Corpus(importCorpus: MarkovV3Corpus): Promise<CorpusEntry[]> {
-    const allFragments: MarkovFragment[] = [];
-    const allRefs: MarkovInputData[] = [];
-    const corpusEntries = Object.entries(importCorpus).map(([key, importFragments]) => {
-      const corpusEntry = new CorpusEntry();
-      const { fragments, refs } = this.extractImportV3Fragments(
-        importFragments,
-        'corpusEntry',
-        corpusEntry
-      );
-      allFragments.push(...fragments);
-      allRefs.push(...refs);
-      corpusEntry.markov = this.db;
-      corpusEntry.block = key;
-      corpusEntry.fragments = fragments;
-      return corpusEntry;
-    });
-
-    await CorpusEntry.save(corpusEntries);
-    await MarkovFragment.save(allFragments);
-    await MarkovInputData.save(allRefs);
-    return corpusEntries;
-  }
-
   /**
-   * Imports a corpus.
-   * Overwrites only if the imported V4 schema uses the same ID
-   * Always overwrites with v3 schema
+   * Imports a corpus. This overwrites existing data
    * @param data
    */
   public async import(data: MarkovRoot | MarkovV3ImportExport): Promise<void> {
     if ('id' in data) {
-      const db = await MarkovRoot.preload(data);
-      if (db) {
-        this.db = db;
-      } else {
-        const options = MarkovOptions.create(data.options);
-        await MarkovOptions.save(options);
-        this.db = new MarkovRoot();
-        this.db.id = this.id;
-        this.db.options = options;
+      const options = MarkovOptions.create(data.options);
+      await MarkovOptions.save(options);
+      this.db = new MarkovRoot();
+      this.db.id = this.id;
+      this.db.options = options;
 
-        const startWords = await this.saveImportFragments(data.startWords, 'startWordMarkov');
-        const endWords = await this.saveImportFragments(data.endWords, 'endWordMarkov');
-        const corpus = await this.saveImportCorpus(data.corpus);
-        this.db.id = this.id;
-        this.db.options = options;
-        this.db.startWords = startWords;
-        this.db.endWords = endWords;
-        this.db.corpus = corpus;
-        await MarkovRoot.save(this.db);
-      }
+      const importer = new Importer(this.db);
+      const startWords = await importer.saveImportFragments(data.startWords, 'startWordMarkov');
+      const endWords = await importer.saveImportFragments(data.endWords, 'endWordMarkov');
+      const corpus = await importer.saveImportCorpus(data.corpus);
+      this.db.id = this.id;
+      this.db.options = options;
+      this.db.startWords = startWords;
+      this.db.endWords = endWords;
+      this.db.corpus = corpus;
+      await MarkovRoot.save(this.db);
     } else {
       // Legacy import
       const options = MarkovOptions.create(data.options);
@@ -332,9 +162,10 @@ export default class Markov {
       this.db.id = this.id;
       this.db.options = options;
 
-      const startWords = await this.saveImportV3Fragments(data.startWords, 'startWordMarkov');
-      const endWords = await this.saveImportV3Fragments(data.endWords, 'endWordMarkov');
-      const corpus = await this.saveImportV3Corpus(data.corpus);
+      const importer = new Importer(this.db);
+      const startWords = await importer.saveImportV3Fragments(data.startWords, 'startWordMarkov');
+      const endWords = await importer.saveImportV3Fragments(data.endWords, 'endWordMarkov');
+      const corpus = await importer.saveImportV3Corpus(data.corpus);
 
       this.db.id = this.id;
       this.db.options = options;
