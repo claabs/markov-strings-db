@@ -12,12 +12,22 @@ import { MarkovImportExport as MarkovV3ImportExport } from './v3-types';
  * Data to build the Markov instance
  */
 export type MarkovConstructorOptions = {
+  /**
+   * Used to set the options database ID manually
+   */
   id?: string;
   stateSize?: number;
 };
 
 export type MarkovConstructorProps = {
+  /**
+   * Used to set a root database ID manually
+   */
   id?: string;
+
+  /**
+   * Global Markov corpus generation options
+   */
   options?: MarkovConstructorOptions;
 };
 
@@ -89,17 +99,21 @@ export default class Markov {
     let db = await MarkovRoot.findOne({
       id: this.id,
     });
+    let options: MarkovOptions;
     if (!db) {
-      const options = MarkovOptions.create(this.options);
+      options = MarkovOptions.create(this.options);
       await MarkovOptions.save(options);
       this.options = options;
       db = new MarkovRoot();
       db.id = this.id;
       db.options = options;
       await MarkovRoot.save(db);
+    } else {
+      options = await MarkovOptions.findOneOrFail(db.options);
     }
     this.db = db;
     this.id = this.db.id;
+    this.options = options;
     return this.connection;
   }
 

@@ -27,6 +27,17 @@ describe('Markov class', () => {
       const markov = new Markov({ options: { stateSize: 3 } });
       expect(markov.options.stateSize).toBe(3);
     });
+
+    it('should persist options in the database', async () => {
+      const markov = new Markov({ options: { stateSize: 3 } });
+      await markov.connect();
+      await markov.disconnect();
+      const markov2 = new Markov();
+      await markov2.connect();
+      expect(markov2.options.stateSize).toBe(3);
+      await markov2.connection.dropDatabase();
+      await markov2.disconnect();
+    });
   });
 
   describe('Adding data', () => {
