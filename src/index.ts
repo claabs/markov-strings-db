@@ -222,6 +222,11 @@ export default class Markov {
     // Loop through all sentences
     // eslint-disable-next-line no-restricted-syntax
     for (const item of data) {
+      // Arrays to store future DB writes so we can write them all in one transaction
+      const entriesToSave: CorpusEntry[] = [];
+      const fragmentsToSave: MarkovFragment[] = [];
+      const inputDataToSave: MarkovInputData[] = [];
+
       const line = item.string;
       const words = line.split(' ');
       const { stateSize } = options; // Default value of 2 is set in the constructor
@@ -241,19 +246,19 @@ export default class Markov {
           inputData.fragment = oldStartObj;
           inputData.string = item.string;
           inputData.custom = item.custom;
-          await MarkovInputData.save(inputData);
+          inputDataToSave.push(inputData);
         }
       } else {
         // Add the startWords (and reference) to the list
         const fragment = new MarkovFragment();
         fragment.words = start;
         fragment.startWordMarkov = this.db;
-        await MarkovFragment.save(fragment);
+        fragmentsToSave.push(fragment);
         const ref = new MarkovInputData();
         ref.fragment = fragment;
         ref.string = item.string;
         ref.custom = item.custom;
-        await MarkovInputData.save(ref);
+        inputDataToSave.push(ref);
       }
 
       // #endregion Start words
@@ -271,18 +276,18 @@ export default class Markov {
           inputData.fragment = oldEndObj;
           inputData.string = item.string;
           inputData.custom = item.custom;
-          await MarkovInputData.save(inputData);
+          inputDataToSave.push(inputData);
         }
       } else {
         const fragment = new MarkovFragment();
         fragment.words = end;
         fragment.endWordMarkov = this.db;
-        await MarkovFragment.save(fragment);
+        fragmentsToSave.push(fragment);
         const ref = new MarkovInputData();
         ref.fragment = fragment;
         ref.string = item.string;
         ref.custom = item.custom;
-        await MarkovInputData.save(ref);
+        inputDataToSave.push(ref);
       }
 
       // #endregion End words
@@ -311,38 +316,41 @@ export default class Markov {
             ref.fragment = oldObj;
             ref.string = item.string;
             ref.custom = item.custom;
-            await MarkovInputData.save(ref);
+            inputDataToSave.push(ref);
           } else {
             // Add the new "next" block in the list of possible paths for "curr"
             const fragment = new MarkovFragment();
             fragment.words = next;
             fragment.corpusEntry = block;
-            await MarkovFragment.save(fragment);
+            fragmentsToSave.push(fragment);
             const ref = new MarkovInputData();
             ref.fragment = fragment;
             ref.string = item.string;
             ref.custom = item.custom;
-            await MarkovInputData.save(ref);
+            inputDataToSave.push(ref);
           }
         } else {
           // Add the "curr" block and link it with the "next" one
           const entry = new CorpusEntry();
           entry.block = curr;
           entry.markov = this.db;
-          await CorpusEntry.save(entry);
+          entriesToSave.push(entry);
           const fragment = new MarkovFragment();
           fragment.words = next;
           fragment.corpusEntry = entry;
-          await MarkovFragment.save(fragment);
+          fragmentsToSave.push(fragment);
           const ref = new MarkovInputData();
           ref.fragment = fragment;
           ref.string = item.string;
           ref.custom = item.custom;
-          await MarkovInputData.save(ref);
+          inputDataToSave.push(ref);
         }
       }
 
-      // #endregion Corpus generation
+      // Save the fragments and input data as they will be needed in the DB for corpus generation
+      await CorpusEntry.save(entriesToSave);
+      await MarkovFragment.save(fragmentsToSave);
+      await MarkovInputData.save(inputDataToSave);
     }
   }
 
