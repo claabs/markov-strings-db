@@ -16,6 +16,13 @@ export type MarkovConstructorOptions = {
    * Used to set the options database ID manually
    */
   id?: string;
+
+  /**
+   * The stateSize is the number of words for each "link" of the generated sentence.
+   * 1 will output gibberish sentences without much sense.
+   * 2 is a sensible default for most cases.
+   * 3 and more can create good sentences if you have a corpus that allows it.
+   */
   stateSize?: number;
 };
 
@@ -35,29 +42,58 @@ export type MarkovConstructorProps = {
  * While `stateSize` is optional as a constructor parameter,
  * it must exist as a member
  */
-export type MarkovDataMembers = {
+export interface MarkovDataMembers {
   stateSize: number;
-};
+}
 
 export interface AddDataProps {
+  /**
+   * A string that the corpus is built from
+   */
   string: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  custom?: any;
+
+  /**
+   * A JSON-like object that will be returned alongside the refs in the result
+   */
+  custom?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export interface MarkovResult<CustomData = never> {
+  /**
+   * The resulting sentence
+   */
   string: string;
+
+  /**
+   *  A relative "score" based on the number of possible permutations.
+   * Higher is "better", but the actual value depends on your corpus.
+   */
   score: number;
+
+  /**
+   * The array of references used to build the sentence.
+   */
   refs: MarkovInputData<CustomData>[];
+
+  /**
+   * The number of tries it took to output this result
+   */
   tries: number;
 }
 
 export type MarkovGenerateOptions<CustomData> = {
+  /**
+   * The max number of tentatives before giving up (default is 10)
+   */
   maxTries?: number;
+
+  /**
+   * A callback to filter results (see example in the Readme)
+   */
   filter?: (result: MarkovResult<CustomData>) => boolean;
 };
 
-export type Corpus = { [key: string]: MarkovFragment[] };
+export type Corpus = Record<string, MarkovFragment[]>;
 
 export default class Markov {
   public db: MarkovRoot;
@@ -76,14 +112,15 @@ export default class Markov {
    * Creates an instance of Markov generator.
    */
   constructor(props?: MarkovConstructorProps) {
-    // this.data = []
-
     this.id = props?.id || '1';
 
     // Save options
     this.options = Object.assign(this.defaultOptions, props?.options);
   }
 
+  /**
+   * Connects this instance to your database. You should setup an ormconfig, or pass it in as an object.
+   */
   public async connect(connectionOptions?: ConnectionOptions): Promise<Connection> {
     let baseConnectionOpts: ConnectionOptions;
     if (connectionOptions) {
@@ -142,7 +179,8 @@ export default class Markov {
   }
 
   /**
-   * Imports a corpus. This overwrites existing data
+   * Imports a corpus. This overwrites existing data.
+   * Supports imports from markov-strings v3, as well as exports from this version.
    */
   public async import(data: MarkovRoot | MarkovV3ImportExport): Promise<void> {
     if ('id' in data) {
@@ -187,7 +225,7 @@ export default class Markov {
   }
 
   /**
-   * Exports structed data used to generate sentence.
+   * Exports all the data in the database associated with this Markov instance as a JSON object.
    */
   public async export(): Promise<MarkovRoot> {
     const db = await MarkovRoot.findOneOrFail({
@@ -210,6 +248,7 @@ export default class Markov {
   /**
    * To function correctly, the Markov generator needs its internal data to be correctly structured. This allows you add raw data, that is automatically formatted to fit the internal structure.
    * You can call this as often as you need, with new data each time. Multiple calls with the same data is not recommended, because it will skew the random generation of results.
+   * It's possible to store custom JSON-like data of your choice next to the string by passing in objects of `{ string: 'foo', custom: 'attachment' }`. This data will be returned in the `refs` of the result.
    */
   public async addData(rawData: AddDataProps[] | string[]) {
     // Format data if necessary
@@ -369,11 +408,10 @@ export default class Markov {
   }
 
   /**
-   * Generates a result, that contains a string and its references
+   * Generates a result, that contains a string and its references.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async generate<CustomData = any>(
-    options: MarkovGenerateOptions<CustomData> = {}
+  public async generate<CustomData = any>( // eslint-disable-line @typescript-eslint/no-explicit-any
+    options?: MarkovGenerateOptions<CustomData>
   ): Promise<MarkovResult<CustomData>> {
     // const corpusSize = await CorpusEntry.count({markov: this.db});
     const corpusSize = await CorpusEntry.count({ markov: this.db });
@@ -384,7 +422,7 @@ export default class Markov {
     }
 
     // const corpus = cloneDeep(this.corpus)
-    const maxTries = options.maxTries ? options.maxTries : 10;
+    const maxTries = options?.maxTries ? options.maxTries : 10;
 
     let tries: number;
 
@@ -448,7 +486,7 @@ export default class Markov {
       };
 
       // sentence is not ended or incorrect
-      if (!ended || (typeof options.filter === 'function' && !options.filter(result))) {
+      if (!ended || (typeof options?.filter === 'function' && !options.filter(result))) {
         // eslint-disable-next-line no-continue
         continue;
       }
