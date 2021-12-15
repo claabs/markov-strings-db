@@ -1,161 +1,76 @@
+# markov-strings-db
+
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/claabs/markov-strings-db/Unit%20test%20and%20build)
 [![Coverage Status](https://coveralls.io/repos/github/claabs/markov-strings-db/badge.svg?branch=master)](https://coveralls.io/github/claabs/markov-strings-db?branch=master)
 ![npm](https://img.shields.io/npm/v/markov-strings-db)
 
----
-! This is the readme for markov-strings **3.x.x.** - The docs for the older **2.x.x** are [here](https://github.com/scambier/markov-strings/tree/v2) !
+A rewrite of [scambier/markov-strings](https://github.com/scambier/markov-strings) made to utilize a relational SQL database rather than an in-memory object.
+The goal is to reduce memory usage, disk reads/writes, remove batch corpus generation, and increase performance.
+
+This should be mostly functionally compatible with `markov-strings` v3, however the API usage varies. This version supports importing data exports from `markov-strings` v3 for easy migration.
 
 ---
-
-# Markov-strings
 
 A simplistic Markov chain text generator.
 Give it an array of strings, and it will output a randomly generated string.
 
-This module was created for the Twitter bot [@BelgicaNews](https://twitter.com/BelgicaNews).
+This rewrite was created for the Discord bot [markov-discord](https://github.com/claabs/markov-discord).
 
-- [Markov-strings](#markov-strings)
-  - [Prerequisites](#prerequisites)
-  - [Installing](#installing)
-  - [Usage](#usage)
-  - [API](#api)
-    - [`new Markov([options])`](#new-markovoptions)
-    - [`.addData(data)`](#adddatadata)
-    - [`.generate([options])`](#generateoptions)
-    - [`.export()` and `.import(data)`](#export-and-importdata)
-  - [Unit tests](#unit-tests)
-  - [Changelog](#changelog)
-  - [Running the tests](#running-the-tests)
 
 ## Prerequisites
 
-Built and tested with NodeJS 12
+- NodeJS 10+
+- The host app must be configured with a [TypeORM](https://typeorm.io)-compatible database driver
 
 ## Installing
 
-`npm install --save markov-strings`
+- `npm i markov-strings-db`
+- Setup a database driver (this project was tested with better-sqlite3)
+  - Step 4 from [this guide](https://github.com/typeorm/typeorm#installation)
+- Setup an [ormconfig file](https://typeorm.io/#/using-ormconfig), or pass in a config object to the `connect()` function
 
 ## Usage
 
-```js
-const Markov = require('markov-strings').default
-// or
-import Markov from 'markov-strings'
+```typescript
+import Markov from 'markov-strings-db';
 
-const data = [/* insert a few hundreds/thousands sentences here */]
+const data = [/* insert a few hundreds/thousands sentences here */];
 
-// Build the Markov generator
-const markov = new Markov({ stateSize: 2 })
+// Instantiate the Markov generator
+const markov = new Markov({ options: { stateSize: 2 }});
+
+// Connect to the database. This is required for anything to work.
+await markov.connect();
 
 // Add data for the generator
-markov.addData(data)
+await markov.addData(data)
 
-const options = {
+const generateOptions = {
   maxTries: 20, // Give up if I don't have a sentence after 20 tries (default is 10)
 
-  // If you want to get seeded results, you can provide an external PRNG.
-  prng: Math.random, // Default value if left empty
-
-  // You'll often need to manually filter raw results to get something that fits your needs.
+  // You may need to manually filter raw results to get something that fits your needs.
   filter: (result) => {
     return result.string.split(' ').length >= 5 && // At least 5 words
-           result.string.endsWith('.')             // End sentences with a dot.
+      result.string.endsWith('.')                  // End sentences with a dot.
   }
 }
 
 // Generate a sentence
-const result = markov.generate(options)
+const result = await markov.generate(generateOptions)
 console.log(result)
 /*
-{
-  string: 'lorem ipsum dolor sit amet etc.',
-  score: 42,
-  tries: 5,
-  refs: [ an array of objects ]
-}
+  {
+    string: 'lorem ipsum dolor sit amet etc.',
+    score: 42,
+    tries: 5,
+    refs: [ an array of objects ]
+  }
 */
-```
 
-Markov-strings is built in TypeScript, and exports several types to help you. Take a look at [the source](https://github.com/scambier/markov-strings/blob/master/src/index.ts) to see how it works.
+await markov.disconnect();
+```
 
 ## API
 
-### `new Markov([options])`
-
-Create a generator instance.
-
-#### options
-
-```js
-{
-  stateSize: number
-}
-```
-
-The `stateSize` is the number of words for each "link" of the generated sentence. `1` will output gibberish sentences without much sense. `2` is a sensible default for most cases. `3` and more can create good sentences if you have a corpus that allows it.
-
-### `.addData(data)`
-
-To function correctly, the Markov generator needs its internal data to be correctly structured. `.addData(data)` allows you add raw data, that is automatically formatted to fit the internal structure.
-
-You can call `.addData(data)` as often as you need, **with new data each time (!)**. Multiple calls of `.addData()` with the same data is not recommended, because it will skew the random generation of results.
-
-#### data
-
-```js
-string[] | Array<{ string: string }>
-```
-
-`data` is an array of strings (sentences), or an array of objects. If you wish to use objects, each one must have a `string` attribute. The bigger the array, the better and more varied the results.
-
-Examples:
-
-```js
-[ 'lorem ipsum', 'dolor sit amet' ]
-```
-
-or
-
-```js
-[
-  { string: 'lorem ipsum', attr: 'value' },
-  { string: 'dolor sit amet', attr: 'other value' }
-]
-```
-
-The additionnal data passed with objects will be returned in the `refs` array of the generated sentence.
-
-### `.generate([options])`
-
-Returns an object of type `MarkovResult`:
-
-```ts
-{
-  string: string, // The resulting sentence
-  score: number,  // A relative "score" based on the number of possible permutations. Higher is "better", but the actual value depends on your corpus
-  refs: Array<{ string: string }>, // The array of references used to build the sentence
-  tries: number   // The number of tries it took to output this result
-}
-```
-
-The `refs` array will contain all objects that have been used to build the sentence. May be useful to fetch meta data or make stats.
-
-#### options
-
-```ts
-{
-  maxTries: number // The max number of tentatives before giving up (default is 10)
-  prng: Math.random, // An external Pseudo Random Number Generator if you want to get seeded results
-  filter: (result: MarkovResult) => boolean // A callback to filter results (see example above)
-}
-```
-
-### `.export()` and `.import(data)`
-
-You can export and import the markov built corpus. The exported data is a serializable object, and must be deserialized before being re-imported.
-
-[Example use-case](https://github.com/scambier/markov-strings/issues/9)
-
-## Running the tests
-
-`npm test`
+Each function is documented via JSDoc and its types.
+Hover over a function in your IDE for details on it.
