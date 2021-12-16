@@ -40,7 +40,7 @@ const data = [/* insert a few hundreds/thousands sentences here */];
 const markov = new Markov({ options: { stateSize: 2 }});
 
 // If you have your own database you'd like to combine with Markov's, make sure to extend your connection
-const connectionOptions = Markov.extendConnectionOptions();
+const connectionOptions = await Markov.extendConnectionOptions();
 // Required: create a connection before using a markov instance. You only need to do this once.
 const connection = await createConnection(connectionOptions);
 
