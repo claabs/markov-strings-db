@@ -1,7 +1,7 @@
 import path from 'path';
 import { readFileSync } from 'fs';
 import Markov, { AddDataProps, MarkovResult } from '../src/index';
-import { CorpusEntry } from '../src/entity/CorpusEntry';
+import { MarkovCorpusEntry } from '../src/entity/MarkovCorpusEntry';
 import { MarkovFragment } from '../src/entity/MarkovFragment';
 
 const data = [
@@ -53,12 +53,12 @@ describe('Markov class', () => {
     });
 
     it('should build corpus', async () => {
-      let count = await CorpusEntry.count({
+      let count = await MarkovCorpusEntry.count({
         markov: markov.db,
       });
       expect(count).toEqual(0);
       await markov.addData(data);
-      count = await CorpusEntry.count({
+      count = await MarkovCorpusEntry.count({
         markov: markov.db,
       });
       expect(count).toBeGreaterThan(0);
@@ -70,7 +70,7 @@ describe('Markov class', () => {
     });
     it('should accept objects', async () => {
       await markov.addData(data.map((o) => ({ string: o })));
-      const count = await CorpusEntry.count({
+      const count = await MarkovCorpusEntry.count({
         markov: markov.db,
       });
       expect(count).toBeGreaterThan(0);
@@ -155,7 +155,7 @@ describe('Markov class', () => {
           ['tempor, erat', 'vel lacinia'],
         ];
         const promises = testSet.map(async ([block, words]) => {
-          const entry = await CorpusEntry.findOne({
+          const entry = await MarkovCorpusEntry.findOne({
             markov: markov.db,
             block,
           });
@@ -194,7 +194,7 @@ describe('Markov class', () => {
       it('onto fresh DB', async () => {
         markov = new Markov();
         await markov.connect();
-        let count = await CorpusEntry.count({
+        let count = await MarkovCorpusEntry.count({
           markov: markov.db,
         });
         expect(count).toEqual(0);
@@ -202,7 +202,7 @@ describe('Markov class', () => {
         const v3Import = JSON.parse(readFileSync(path.join(__dirname, 'v3-export.json'), 'utf8'));
         await markov.import(v3Import);
 
-        count = await CorpusEntry.count({
+        count = await MarkovCorpusEntry.count({
           markov: markov.db,
         });
         expect(count).toEqual(28);
@@ -220,7 +220,7 @@ describe('Markov class', () => {
         const v3Import = JSON.parse(readFileSync(path.join(__dirname, 'v3-export.json'), 'utf8'));
         await markov.import(v3Import);
 
-        const count = await CorpusEntry.count({
+        const count = await MarkovCorpusEntry.count({
           markov: markov.db,
         });
         expect(count).toEqual(28);
@@ -231,7 +231,7 @@ describe('Markov class', () => {
       it('onto fresh DB', async () => {
         markov = new Markov();
         await markov.connect();
-        let count = await CorpusEntry.count({
+        let count = await MarkovCorpusEntry.count({
           markov: markov.db,
         });
         expect(count).toEqual(0);
@@ -239,7 +239,7 @@ describe('Markov class', () => {
         const v4Import = JSON.parse(readFileSync(path.join(__dirname, 'v4-export.json'), 'utf8'));
         await markov.import(v4Import);
 
-        count = await CorpusEntry.count({
+        count = await MarkovCorpusEntry.count({
           markov: markov.db,
         });
         expect(count).toEqual(28);
@@ -257,7 +257,7 @@ describe('Markov class', () => {
         const v4Import = JSON.parse(readFileSync(path.join(__dirname, 'v4-export.json'), 'utf8'));
         await markov.import(v4Import);
 
-        const count = await CorpusEntry.count({
+        const count = await MarkovCorpusEntry.count({
           markov: markov.db,
         });
         expect(count).toEqual(28);

@@ -1,4 +1,4 @@
-/* eslint-disable import/no-cycle */
+
 import {
   Entity,
   BaseEntity,
@@ -7,7 +7,7 @@ import {
   OneToMany,
   JoinColumn,
 } from 'typeorm';
-import { CorpusEntry } from './CorpusEntry';
+import { MarkovCorpusEntry } from './MarkovCorpusEntry';
 import { MarkovFragment } from './MarkovFragment';
 import { MarkovOptions } from './MarkovOptions';
 
@@ -16,8 +16,8 @@ export class MarkovRoot extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: string;
 
-  @OneToMany(() => CorpusEntry, (entry) => entry.markov, { nullable: true })
-  corpus: CorpusEntry[];
+  @OneToMany(() => MarkovCorpusEntry, (entry) => entry.markov, { nullable: true })
+  corpus: MarkovCorpusEntry[];
 
   @OneToMany(() => MarkovFragment, (fragment) => fragment.startWordMarkov, { nullable: true })
   startWords: MarkovFragment[];

@@ -1,4 +1,3 @@
-/* eslint-disable import/no-cycle */
 import {
   Entity,
   BaseEntity,
@@ -12,7 +11,7 @@ import { MarkovFragment } from './MarkovFragment';
 import { MarkovRoot } from './MarkovRoot';
 
 @Entity()
-export class CorpusEntry extends BaseEntity {
+export class MarkovCorpusEntry extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: string;
 

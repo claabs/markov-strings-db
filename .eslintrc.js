@@ -24,6 +24,7 @@ module.exports = {
     'import/named': 0,
     'import/no-named-as-default': 0,
     'import/no-named-as-default-member': 0,
+    'import/no-cycle': 0,
   },
   settings: {
     'import/extensions': ['.js', '.ts',],

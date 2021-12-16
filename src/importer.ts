@@ -1,4 +1,4 @@
-import { CorpusEntry } from './entity/CorpusEntry';
+import { MarkovCorpusEntry } from './entity/MarkovCorpusEntry';
 import { MarkovFragment } from './entity/MarkovFragment';
 import { MarkovInputData } from './entity/MarkovInputData';
 import { MarkovRoot } from './entity/MarkovRoot';
@@ -22,7 +22,7 @@ export class Importer {
   private extractImportFragments(
     importFragments: MarkovFragment[],
     foreignKey: 'corpusEntry',
-    corpusEntry: CorpusEntry
+    corpusEntry: MarkovCorpusEntry
   ): ImportFragmentExtract;
 
   private extractImportFragments(
@@ -33,7 +33,7 @@ export class Importer {
   private extractImportFragments(
     importFragments: MarkovFragment[],
     foreignKey: 'startWordMarkov' | 'endWordMarkov' | 'corpusEntry',
-    corpusEntry?: CorpusEntry
+    corpusEntry?: MarkovCorpusEntry
   ): ImportFragmentExtract {
     const allRefs: MarkovInputData[] = [];
     const fragments = importFragments.map((importFragment) => {
@@ -70,11 +70,11 @@ export class Importer {
     return fragments;
   }
 
-  public async saveImportCorpus(importCorpus: CorpusEntry[]): Promise<CorpusEntry[]> {
+  public async saveImportCorpus(importCorpus: MarkovCorpusEntry[]): Promise<MarkovCorpusEntry[]> {
     const allFragments: MarkovFragment[] = [];
     const allRefs: MarkovInputData[] = [];
     const corpusEntries = importCorpus.map((importCorpusEntry) => {
-      const corpusEntry = CorpusEntry.create(importCorpusEntry);
+      const corpusEntry = MarkovCorpusEntry.create(importCorpusEntry);
       const { fragments, refs } = this.extractImportFragments(
         importCorpusEntry.fragments,
         'corpusEntry',
@@ -87,7 +87,7 @@ export class Importer {
       return corpusEntry;
     });
 
-    await CorpusEntry.save(corpusEntries);
+    await MarkovCorpusEntry.save(corpusEntries);
     await MarkovFragment.save(allFragments);
     await MarkovInputData.save(allRefs);
     return corpusEntries;
@@ -96,7 +96,7 @@ export class Importer {
   private extractImportV3Fragments(
     importFragments: MarkovV3Fragment[],
     foreignKey: 'corpusEntry',
-    corpusEntry: CorpusEntry
+    corpusEntry: MarkovCorpusEntry
   ): ImportFragmentExtract;
 
   private extractImportV3Fragments(
@@ -107,7 +107,7 @@ export class Importer {
   private extractImportV3Fragments(
     importFragments: MarkovV3Fragment[],
     foreignKey: 'startWordMarkov' | 'endWordMarkov' | 'corpusEntry',
-    corpusEntry?: CorpusEntry
+    corpusEntry?: MarkovCorpusEntry
   ): ImportFragmentExtract {
     const allRefs: MarkovInputData[] = [];
     const fragments = importFragments.map((importFragment) => {
@@ -152,11 +152,11 @@ export class Importer {
     return fragments;
   }
 
-  public async saveImportV3Corpus(importCorpus: MarkovV3Corpus): Promise<CorpusEntry[]> {
+  public async saveImportV3Corpus(importCorpus: MarkovV3Corpus): Promise<MarkovCorpusEntry[]> {
     const allFragments: MarkovFragment[] = [];
     const allRefs: MarkovInputData[] = [];
     const corpusEntries = Object.entries(importCorpus).map(([key, importFragments]) => {
-      const corpusEntry = new CorpusEntry();
+      const corpusEntry = new MarkovCorpusEntry();
       const { fragments, refs } = this.extractImportV3Fragments(
         importFragments,
         'corpusEntry',
@@ -170,7 +170,7 @@ export class Importer {
       return corpusEntry;
     });
 
-    await CorpusEntry.save(corpusEntries);
+    await MarkovCorpusEntry.save(corpusEntries);
     await MarkovFragment.save(allFragments);
     await MarkovInputData.save(allRefs);
     return corpusEntries;

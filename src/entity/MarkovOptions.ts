@@ -1,4 +1,3 @@
-/* eslint-disable import/no-cycle */
 import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, OneToOne } from 'typeorm';
 import { MarkovRoot } from './MarkovRoot';
 

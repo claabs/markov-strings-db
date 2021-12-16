@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import { Connection, ConnectionOptions, createConnection, getConnectionOptions, In } from 'typeorm';
-import { CorpusEntry } from './entity/CorpusEntry';
+import { MarkovCorpusEntry } from './entity/MarkovCorpusEntry';
 import { MarkovFragment } from './entity/MarkovFragment';
 import { MarkovInputData } from './entity/MarkovInputData';
 import { MarkovOptions } from './entity/MarkovOptions';
@@ -130,7 +130,7 @@ export default class Markov {
     }
     this.connection = await createConnection({
       ...baseConnectionOpts,
-      entities: [CorpusEntry, MarkovRoot, MarkovOptions, MarkovInputData, MarkovFragment],
+      entities: [MarkovCorpusEntry, MarkovRoot, MarkovOptions, MarkovInputData, MarkovFragment],
     });
 
     let db = await MarkovRoot.findOne({
@@ -163,7 +163,7 @@ export default class Markov {
   /**
    * Gets a random fragment for a startWord or corpusEntry from the database.
    */
-  private async sampleFragment(condition?: CorpusEntry): Promise<MarkovFragment | undefined> {
+  private async sampleFragment(condition?: MarkovCorpusEntry): Promise<MarkovFragment | undefined> {
     let queryCondition;
     if (!condition) {
       queryCondition = { startWordMarkov: this.db };
@@ -276,7 +276,7 @@ export default class Markov {
     // eslint-disable-next-line no-restricted-syntax
     for (const item of data) {
       // Arrays to store future DB writes so we can write them all in one transaction
-      const entriesToSave: CorpusEntry[] = [];
+      const entriesToSave: MarkovCorpusEntry[] = [];
       const fragmentsToSave: MarkovFragment[] = [];
       const inputDataToSave: MarkovInputData[] = [];
 
@@ -359,7 +359,7 @@ export default class Markov {
         }
 
         // Check if the corpus already has a corresponding "curr" block
-        const block = await CorpusEntry.findOne({ markov: this.db, block: curr });
+        const block = await MarkovCorpusEntry.findOne({ markov: this.db, block: curr });
         if (block) {
           const oldObj = await MarkovFragment.findOne({ corpusEntry: block, words: next });
           if (oldObj) {
@@ -384,7 +384,7 @@ export default class Markov {
           }
         } else {
           // Add the "curr" block and link it with the "next" one
-          const entry = new CorpusEntry();
+          const entry = new MarkovCorpusEntry();
           entry.block = curr;
           entry.markov = this.db;
           entriesToSave.push(entry);
@@ -401,7 +401,7 @@ export default class Markov {
       }
 
       // Save the fragments and input data as they will be needed in the DB for corpus generation
-      await CorpusEntry.save(entriesToSave);
+      await MarkovCorpusEntry.save(entriesToSave);
       await MarkovFragment.save(fragmentsToSave);
       await MarkovInputData.save(inputDataToSave);
     }
@@ -414,7 +414,7 @@ export default class Markov {
     options?: MarkovGenerateOptions<CustomData>
   ): Promise<MarkovResult<CustomData>> {
     // const corpusSize = await CorpusEntry.count({markov: this.db});
-    const corpusSize = await CorpusEntry.count({ markov: this.db });
+    const corpusSize = await MarkovCorpusEntry.count({ markov: this.db });
     if (corpusSize <= 0) {
       throw new Error(
         'Corpus is empty. There is either no data, or the data is not sufficient to create markov chains.'
@@ -444,7 +444,7 @@ export default class Markov {
       // loop to build a complete sentence
       for (let innerTries = 0; innerTries < maxTries; innerTries += 1) {
         const block = arr[arr.length - 1]; // last value in array
-        const entry = await CorpusEntry.findOne({ where: { block: block.words } });
+        const entry = await MarkovCorpusEntry.findOne({ where: { block: block.words } });
         if (!entry) break;
 
         const state = await this.sampleFragment(entry); // Find a following item in the corpus
