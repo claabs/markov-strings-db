@@ -3,6 +3,7 @@ import { readFileSync } from 'fs';
 import Markov, { AddDataProps, MarkovResult } from '../src/index';
 import { MarkovCorpusEntry } from '../src/entity/MarkovCorpusEntry';
 import { MarkovFragment } from '../src/entity/MarkovFragment';
+import { MarkovInputData } from '../src/entity/MarkovInputData';
 
 const data = [
   'Lorem ipsum dolor sit amet',
@@ -381,6 +382,24 @@ describe('Markov class', () => {
           },
         };
         await markov.generate(options);
+      });
+
+      it(`should erase a phrase from the database`, async () => {
+        const deletePhrase = data[3];
+
+        const beforeInputDataCount = await MarkovInputData.count();
+        const beforeFragmentCount = await MarkovFragment.count();
+        const beforeCorpusEntryCount = await MarkovCorpusEntry.count();
+
+        await markov.removeData([deletePhrase]);
+
+        const afterInputDataCount = await MarkovInputData.count();
+        const afterFragmentCount = await MarkovFragment.count();
+        const afterCorpusEntryCount = await MarkovCorpusEntry.count();
+
+        expect(afterInputDataCount).toBeLessThan(beforeInputDataCount);
+        expect(afterFragmentCount).toBeLessThan(beforeFragmentCount);
+        expect(afterCorpusEntryCount).toBeLessThan(beforeCorpusEntryCount);
       });
     });
   });

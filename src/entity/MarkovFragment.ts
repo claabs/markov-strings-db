@@ -29,6 +29,6 @@ export class MarkovFragment extends BaseEntity {
   @ManyToOne(() => MarkovRoot, { nullable: true })
   endWordMarkov?: MarkovRoot;
 
-  @ManyToOne(() => MarkovCorpusEntry, { nullable: true })
+  @ManyToOne(() => MarkovCorpusEntry, { nullable: true, onDelete: 'CASCADE' })
   corpusEntry?: MarkovCorpusEntry;
 }

@@ -408,6 +408,40 @@ export default class Markov {
   }
 
   /**
+   * Remove a string and all its references from the database
+   * @param rawData A list of full strings
+   */
+  public async removeData(rawData: string[]): Promise<void> {
+    const inputData = await MarkovInputData.find({
+      relations: ['fragment', 'fragment.corpusEntry'],
+      where: [
+        {
+          string: rawData,
+          fragment: { startWordMarkov: this.db },
+        },
+        {
+          string: rawData,
+          fragment: { endWordMarkov: this.db },
+        },
+        {
+          string: rawData,
+          fragment: { corpusEntry: { markov: this.db } },
+        },
+      ],
+    });
+    const uniqueFragments = [
+      ...new Map(inputData.map((d) => [d.fragment.id, d.fragment])).values(),
+    ];
+    const uniqueCorpusEntries = [
+      ...new Map(uniqueFragments.map((f) => [f.corpusEntry?.id, f.corpusEntry])).values(),
+    ].filter((c): c is MarkovCorpusEntry => c !== null);
+
+    await MarkovInputData.remove(inputData);
+    await MarkovFragment.remove(uniqueFragments);
+    await MarkovCorpusEntry.remove(uniqueCorpusEntries);
+  }
+
+  /**
    * Generates a result, that contains a string and its references.
    */
   public async generate<CustomData = any>( // eslint-disable-line @typescript-eslint/no-explicit-any

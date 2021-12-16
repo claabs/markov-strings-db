@@ -13,6 +13,6 @@ export class MarkovInputData<CustomData = any> extends BaseEntity {
   @Column('simple-json', { nullable: true })
   custom: CustomData;
 
-  @ManyToOne(() => MarkovFragment, { nullable: true })
+  @ManyToOne(() => MarkovFragment, { nullable: true, onDelete: 'CASCADE' })
   fragment: MarkovFragment;
 }
