@@ -16,7 +16,6 @@ Give it an array of strings, and it will output a randomly generated string.
 
 This rewrite was created for the Discord bot [markov-discord](https://github.com/claabs/markov-discord).
 
-
 ## Prerequisites
 
 - NodeJS 10+
@@ -36,11 +35,17 @@ import Markov from 'markov-strings-db';
 
 const data = [/* insert a few hundreds/thousands sentences here */];
 
+
 // Instantiate the Markov generator
 const markov = new Markov({ options: { stateSize: 2 }});
 
-// Connect to the database. This is required for anything to work.
-await markov.connect();
+// If you have your own database you'd like to combine with Markov's, make sure to extend your connection
+const connectionOptions = Markov.extendConnectionOptions();
+// Required: create a connection before using a markov instance. You only need to do this once.
+const connection = await createConnection(connectionOptions);
+
+// If you have a non-default connection (you probably don't), pass it in here. Otherwise, setup() is called implicitly on any async function.
+await markov.setup(connection);
 
 // Add data for the generator
 await markov.addData(data)

@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import { Connection, ConnectionOptions, createConnection, getConnectionOptions, In } from 'typeorm';
+import { Connection, ConnectionOptions, EntitySchema, getConnectionOptions, In } from 'typeorm';
 import { MarkovCorpusEntry } from './entity/MarkovCorpusEntry';
 import { MarkovFragment } from './entity/MarkovFragment';
 import { MarkovInputData } from './entity/MarkovInputData';
@@ -7,6 +7,14 @@ import { MarkovOptions } from './entity/MarkovOptions';
 import { MarkovRoot } from './entity/MarkovRoot';
 import { Importer } from './importer';
 import { MarkovImportExport as MarkovV3ImportExport } from './v3-types';
+
+const ALL_ENTITIES = [
+  MarkovCorpusEntry,
+  MarkovRoot,
+  MarkovOptions,
+  MarkovInputData,
+  MarkovFragment,
+];
 
 /**
  * Data to build the Markov instance
@@ -100,13 +108,35 @@ export default class Markov {
 
   public options: MarkovOptions | MarkovDataMembers;
 
-  public connection: Connection;
-
   public id: string;
 
   private defaultOptions: MarkovDataMembers = {
     stateSize: 2,
   };
+
+  /**
+   * If you're connecting the Markov DB with your parent project's DB, you'll need to extend it to add the Markov entities to the connection.
+   * @param connectionOptions Your TypeORM connection options. If not provided, it will load the ormconfig from a file.
+   * @returns ConnectionOptions that should be passed into a createConnection() call.
+   */
+  public static async extendConnectionOptions(
+    connectionOptions?: ConnectionOptions
+  ): Promise<ConnectionOptions> {
+    let baseConnectionOpts: ConnectionOptions;
+    if (connectionOptions) {
+      baseConnectionOpts = connectionOptions;
+    } else {
+      baseConnectionOpts = await getConnectionOptions();
+    }
+
+    // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any
+    const appendedEntities: (Function | string | EntitySchema<any>)[] = ALL_ENTITIES;
+    if (baseConnectionOpts.entities) appendedEntities.push(...baseConnectionOpts.entities);
+    return {
+      ...baseConnectionOpts,
+      entities: appendedEntities,
+    };
+  }
 
   /**
    * Creates an instance of Markov generator.
@@ -119,19 +149,12 @@ export default class Markov {
   }
 
   /**
-   * Connects this instance to your database. You should setup an ormconfig, or pass it in as an object.
+   * If you have a non-default connection (you probably don't), pass it in here.
+   * Otherwise, setup() is called implicitly on any async function.
+   * @param connection A non-default connection to be used by Markov's entities
    */
-  public async connect(connectionOptions?: ConnectionOptions): Promise<Connection> {
-    let baseConnectionOpts: ConnectionOptions;
-    if (connectionOptions) {
-      baseConnectionOpts = connectionOptions;
-    } else {
-      baseConnectionOpts = await getConnectionOptions();
-    }
-    this.connection = await createConnection({
-      ...baseConnectionOpts,
-      entities: [MarkovCorpusEntry, MarkovRoot, MarkovOptions, MarkovInputData, MarkovFragment],
-    });
+  public async setup(connection?: Connection): Promise<void> {
+    if (connection) ALL_ENTITIES.forEach((e) => e.useConnection(connection));
 
     let db = await MarkovRoot.findOne({
       id: this.id,
@@ -151,13 +174,10 @@ export default class Markov {
     this.db = db;
     this.id = this.db.id;
     this.options = options;
-    return this.connection;
   }
 
-  public async disconnect(): Promise<void> {
-    if (this.connection) {
-      await this.connection.close();
-    }
+  private async ensureSetup(): Promise<void> {
+    if (!this.db) await this.setup();
   }
 
   /**
@@ -183,12 +203,13 @@ export default class Markov {
    * Supports imports from markov-strings v3, as well as exports from this version.
    */
   public async import(data: MarkovRoot | MarkovV3ImportExport): Promise<void> {
+    await this.ensureSetup();
     if ('id' in data) {
-      const options = MarkovOptions.create(data.options);
-      await MarkovOptions.save(options);
       this.db = new MarkovRoot();
       this.db.id = this.id;
+      const options = MarkovOptions.create(data.options);
       this.db.options = options;
+      await MarkovOptions.save(options);
 
       const importer = new Importer(this.db);
       const startWords = await importer.saveImportFragments(data.startWords, 'startWordMarkov');
@@ -228,6 +249,7 @@ export default class Markov {
    * Exports all the data in the database associated with this Markov instance as a JSON object.
    */
   public async export(): Promise<MarkovRoot> {
+    await this.ensureSetup();
     const db = await MarkovRoot.findOneOrFail({
       where: { id: this.id },
       relations: [
@@ -251,6 +273,7 @@ export default class Markov {
    * It's possible to store custom JSON-like data of your choice next to the string by passing in objects of `{ string: 'foo', custom: 'attachment' }`. This data will be returned in the `refs` of the result.
    */
   public async addData(rawData: AddDataProps[] | string[]) {
+    await this.ensureSetup();
     // Format data if necessary
     let input: AddDataProps[] = [];
     if (typeof rawData[0] === 'string') {
@@ -270,6 +293,7 @@ export default class Markov {
    * Builds the corpus. You must call this before generating sentences.
    */
   private async buildCorpus(data: AddDataProps[]): Promise<void> {
+    await this.ensureSetup();
     const { options } = this.db;
 
     // Loop through all sentences
@@ -412,6 +436,7 @@ export default class Markov {
    * @param rawData A list of full strings
    */
   public async removeData(rawData: string[]): Promise<void> {
+    await this.ensureSetup();
     const inputData = await MarkovInputData.find({
       relations: ['fragment', 'fragment.corpusEntry'],
       where: [
@@ -447,7 +472,7 @@ export default class Markov {
   public async generate<CustomData = any>( // eslint-disable-line @typescript-eslint/no-explicit-any
     options?: MarkovGenerateOptions<CustomData>
   ): Promise<MarkovResult<CustomData>> {
-    // const corpusSize = await CorpusEntry.count({markov: this.db});
+    await this.ensureSetup();
     const corpusSize = await MarkovCorpusEntry.count({ markov: this.db });
     if (corpusSize <= 0) {
       throw new Error(
@@ -455,7 +480,6 @@ export default class Markov {
       );
     }
 
-    // const corpus = cloneDeep(this.corpus)
     const maxTries = options?.maxTries ? options.maxTries : 10;
 
     let tries: number;

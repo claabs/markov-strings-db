@@ -1,5 +1,6 @@
 import path from 'path';
 import { readFileSync } from 'fs';
+import { Connection, createConnection } from 'typeorm';
 import Markov, { AddDataProps, MarkovResult } from '../src/index';
 import { MarkovCorpusEntry } from '../src/entity/MarkovCorpusEntry';
 import { MarkovFragment } from '../src/entity/MarkovFragment';
@@ -18,6 +19,8 @@ const data = [
 
 jest.setTimeout(1000000);
 describe('Markov class', () => {
+  let connection: Connection;
+
   describe('Constructor', () => {
     it('should have a default stateSize', () => {
       const markov = new Markov();
@@ -30,14 +33,14 @@ describe('Markov class', () => {
     });
 
     it('should persist options in the database', async () => {
+      connection = await createConnection();
       const markov = new Markov({ options: { stateSize: 3 } });
-      await markov.connect();
-      await markov.disconnect();
+      await markov.setup();
       const markov2 = new Markov();
-      await markov2.connect();
+      await markov2.setup();
       expect(markov2.options.stateSize).toBe(3);
-      await markov2.connection.dropDatabase();
-      await markov2.disconnect();
+      await connection.dropDatabase();
+      await connection.close();
     });
   });
 
@@ -45,12 +48,12 @@ describe('Markov class', () => {
     let markov: Markov;
     beforeEach(async () => {
       markov = new Markov();
-      await markov.connect();
+      connection = await createConnection();
     });
 
     afterEach(async () => {
-      await markov.connection.dropDatabase();
-      await markov.disconnect();
+      await connection.dropDatabase();
+      await connection.close();
     });
 
     it('should build corpus', async () => {
@@ -82,13 +85,13 @@ describe('Markov class', () => {
     let markov: Markov;
     beforeEach(async () => {
       markov = new Markov();
-      await markov.connect();
+      connection = await createConnection();
       await markov.addData(data);
     });
 
     afterEach(async () => {
-      await markov.connection.dropDatabase();
-      await markov.disconnect();
+      await connection.dropDatabase();
+      await connection.close();
     });
 
     describe('The startWords array', () => {
@@ -175,13 +178,13 @@ describe('Markov class', () => {
   describe('Import/Export', () => {
     let markov: Markov;
     afterEach(async () => {
-      await markov.connection.dropDatabase();
-      await markov.disconnect();
+      await connection.dropDatabase();
+      await connection.close();
     });
 
     it('should export the original database values', async () => {
       markov = new Markov();
-      await markov.connect();
+      connection = await createConnection();
       await markov.addData(data);
 
       const exported = await markov.export();
@@ -194,7 +197,7 @@ describe('Markov class', () => {
     describe('Import v3 data', () => {
       it('onto fresh DB', async () => {
         markov = new Markov();
-        await markov.connect();
+        connection = await createConnection();
         let count = await MarkovCorpusEntry.count({
           markov: markov.db,
         });
@@ -215,7 +218,7 @@ describe('Markov class', () => {
 
       it('should overwrite original values', async () => {
         markov = new Markov();
-        await markov.connect();
+        connection = await createConnection();
         await markov.addData(data);
 
         const v3Import = JSON.parse(readFileSync(path.join(__dirname, 'v3-export.json'), 'utf8'));
@@ -231,7 +234,7 @@ describe('Markov class', () => {
     describe('Import v4 data', () => {
       it('onto fresh DB', async () => {
         markov = new Markov();
-        await markov.connect();
+        connection = await createConnection();
         let count = await MarkovCorpusEntry.count({
           markov: markov.db,
         });
@@ -252,7 +255,7 @@ describe('Markov class', () => {
 
       it('should overwrite original values', async () => {
         markov = new Markov();
-        await markov.connect();
+        connection = await createConnection();
         await markov.addData(data);
 
         const v4Import = JSON.parse(readFileSync(path.join(__dirname, 'v4-export.json'), 'utf8'));
@@ -271,12 +274,12 @@ describe('Markov class', () => {
     describe('With no data', () => {
       beforeEach(async () => {
         markov = new Markov();
-        await markov.connect();
+        connection = await createConnection();
       });
 
       afterEach(async () => {
-        await markov.connection.dropDatabase();
-        await markov.disconnect();
+        await connection.dropDatabase();
+        await connection.close();
       });
 
       it('should throw an error if the corpus is not built', async () => {
@@ -314,13 +317,13 @@ describe('Markov class', () => {
     describe('With data', () => {
       beforeEach(async () => {
         markov = new Markov();
-        await markov.connect();
+        connection = await createConnection();
         await markov.addData(data);
       });
 
       afterEach(async () => {
-        await markov.connection.dropDatabase();
-        await markov.disconnect();
+        await connection.dropDatabase();
+        await connection.close();
       });
 
       it('should return a result if under the tries limit', async () => {
