@@ -73,7 +73,7 @@ export interface MarkovResult<CustomData = never> {
   string: string;
 
   /**
-   *  A relative "score" based on the number of possible permutations.
+   * A relative "score" based on the number of possible permutations.
    * Higher is "better", but the actual value depends on your corpus.
    */
   score: number;
@@ -89,7 +89,8 @@ export interface MarkovResult<CustomData = never> {
   tries: number;
 }
 
-export type MarkovGenerateOptions<CustomData> = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type MarkovGenerateOptions<CustomData = any> = {
   /**
    * The max number of tentatives before giving up (default is 10)
    */
