@@ -1,4 +1,3 @@
-
 import {
   Entity,
   BaseEntity,
@@ -25,7 +24,7 @@ export class MarkovRoot extends BaseEntity {
   @OneToMany(() => MarkovFragment, (fragment) => fragment.endWordMarkov, { nullable: true })
   endWords: MarkovFragment[];
 
-  @OneToOne(() => MarkovOptions)
+  @OneToOne(() => MarkovOptions, { onDelete: 'CASCADE' })
   @JoinColumn()
   options: MarkovOptions;
 }

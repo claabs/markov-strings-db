@@ -114,6 +114,8 @@ export default class Markov {
     stateSize: 2,
   };
 
+  private constructorProps?: MarkovConstructorProps;
+
   /**
    * If you're connecting the Markov DB with your parent project's DB, you'll need to extend it to add the Markov entities to the connection.
    * @param connectionOptions Your TypeORM connection options. If not provided, it will load the ormconfig from a file.
@@ -142,10 +144,15 @@ export default class Markov {
    * Creates an instance of Markov generator.
    */
   constructor(props?: MarkovConstructorProps) {
-    this.id = props?.id || '1';
+    this.constructorProps = props;
+    this.construct();
+  }
+
+  private construct() {
+    this.id = this.constructorProps?.id || '1';
 
     // Save options
-    this.options = Object.assign(this.defaultOptions, props?.options);
+    this.options = Object.assign(this.defaultOptions, this.constructorProps?.options);
   }
 
   /**
@@ -464,6 +471,40 @@ export default class Markov {
     await MarkovInputData.remove(inputData);
     await MarkovFragment.remove(uniqueFragments);
     await MarkovCorpusEntry.remove(uniqueCorpusEntries);
+  }
+
+  /**
+   * Delete this instance's entire database and reset the ID
+   */
+  public async delete(): Promise<void> {
+    await this.ensureSetup();
+    const inputData = await MarkovInputData.find({
+      relations: ['fragment', 'fragment.corpusEntry'],
+      where: [
+        {
+          fragment: { startWordMarkov: this.db },
+        },
+        {
+          fragment: { endWordMarkov: this.db },
+        },
+        {
+          fragment: { corpusEntry: { markov: this.db } },
+        },
+      ],
+    });
+    const uniqueFragments = [
+      ...new Map(inputData.map((d) => [d.fragment.id, d.fragment])).values(),
+    ];
+    const uniqueCorpusEntries = [
+      ...new Map(uniqueFragments.map((f) => [f.corpusEntry?.id, f.corpusEntry])).values(),
+    ].filter((c): c is MarkovCorpusEntry => c !== null);
+
+    await MarkovInputData.remove(inputData);
+    await MarkovFragment.remove(uniqueFragments);
+    await MarkovCorpusEntry.remove(uniqueCorpusEntries);
+    if (this.options instanceof MarkovOptions) await MarkovOptions.remove(this.options);
+    await MarkovRoot.remove(this.db);
+    this.construct();
   }
 
   /**

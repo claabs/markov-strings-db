@@ -5,6 +5,8 @@ import Markov, { AddDataProps, MarkovResult } from '../src/index';
 import { MarkovCorpusEntry } from '../src/entity/MarkovCorpusEntry';
 import { MarkovFragment } from '../src/entity/MarkovFragment';
 import { MarkovInputData } from '../src/entity/MarkovInputData';
+import { MarkovOptions } from '../src/entity/MarkovOptions';
+import { MarkovRoot } from '../src/entity/MarkovRoot';
 
 const data = [
   'Lorem ipsum dolor sit amet',
@@ -385,6 +387,22 @@ describe('Markov class', () => {
           },
         };
         await markov.generate(options);
+      });
+
+      it(`should delete the entire database`, async () => {
+        await markov.delete();
+
+        const afterInputDataCount = await MarkovInputData.count();
+        const afterFragmentCount = await MarkovFragment.count();
+        const afterCorpusEntryCount = await MarkovCorpusEntry.count();
+        const afterOptionsCount = await MarkovOptions.count();
+        const afterRootCount = await MarkovRoot.count();
+
+        expect(afterInputDataCount).toEqual(0);
+        expect(afterFragmentCount).toEqual(0);
+        expect(afterCorpusEntryCount).toEqual(0);
+        expect(afterOptionsCount).toEqual(0);
+        expect(afterRootCount).toEqual(0);
       });
 
       it(`should erase a phrase from the database`, async () => {
