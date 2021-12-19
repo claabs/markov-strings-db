@@ -14,7 +14,7 @@ import { MarkovRoot } from './MarkovRoot';
 @Entity()
 export class MarkovFragment extends BaseEntity {
   @PrimaryGeneratedColumn()
-  id: string;
+  id: number;
 
   @Index()
   @Column()

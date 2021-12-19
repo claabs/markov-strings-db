@@ -5,6 +5,7 @@ import {
   PrimaryGeneratedColumn,
   OneToMany,
   JoinColumn,
+  ValueTransformer,
 } from 'typeorm';
 import { MarkovCorpusEntry } from './MarkovCorpusEntry';
 import { MarkovFragment } from './MarkovFragment';
@@ -13,7 +14,7 @@ import { MarkovOptions } from './MarkovOptions';
 @Entity()
 export class MarkovRoot extends BaseEntity {
   @PrimaryGeneratedColumn()
-  id: string;
+  id: number;
 
   @OneToMany(() => MarkovCorpusEntry, (entry) => entry.markov, { nullable: true })
   corpus: MarkovCorpusEntry[];

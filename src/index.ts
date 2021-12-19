@@ -23,7 +23,7 @@ export type MarkovConstructorOptions = {
   /**
    * Used to set the options database ID manually
    */
-  id?: string;
+  id?: number;
 
   /**
    * The stateSize is the number of words for each "link" of the generated sentence.
@@ -38,7 +38,7 @@ export type MarkovConstructorProps = {
   /**
    * Used to set a root database ID manually
    */
-  id?: string;
+  id?: number;
 
   /**
    * Global Markov corpus generation options
@@ -109,7 +109,7 @@ export default class Markov {
 
   public options: MarkovOptions | MarkovDataMembers;
 
-  public id: string;
+  public id: number;
 
   private defaultOptions: MarkovDataMembers = {
     stateSize: 2,
@@ -150,7 +150,7 @@ export default class Markov {
   }
 
   private construct() {
-    this.id = this.constructorProps?.id || '1';
+    this.id = this.constructorProps?.id || 1;
 
     // Save options
     this.options = Object.assign(this.defaultOptions, this.constructorProps?.options);
@@ -280,8 +280,9 @@ export default class Markov {
    * You can call this as often as you need, with new data each time. Multiple calls with the same data is not recommended, because it will skew the random generation of results.
    * It's possible to store custom JSON-like data of your choice next to the string by passing in objects of `{ string: 'foo', custom: 'attachment' }`. This data will be returned in the `refs` of the result.
    */
-  public async addData(rawData: AddDataProps[] | string[]) {
+  public async addData(rawData: AddDataProps[] | string[]): Promise<void> {
     await this.ensureSetup();
+    if (!rawData.length) return;
     // Format data if necessary
     let input: AddDataProps[] = [];
     if (typeof rawData[0] === 'string') {
@@ -302,7 +303,7 @@ export default class Markov {
    */
   private async buildCorpus(data: AddDataProps[]): Promise<void> {
     await this.ensureSetup();
-    const { options } = this.db;
+    const { options } = this;
 
     // Loop through all sentences
     // eslint-disable-next-line no-restricted-syntax

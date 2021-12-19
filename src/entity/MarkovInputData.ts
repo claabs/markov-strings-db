@@ -5,7 +5,7 @@ import { MarkovFragment } from './MarkovFragment';
 @Entity()
 export class MarkovInputData<CustomData = any> extends BaseEntity {
   @PrimaryGeneratedColumn()
-  id: string;
+  id: number;
 
   @Column()
   string: string;

@@ -4,7 +4,7 @@ import { MarkovRoot } from './MarkovRoot';
 @Entity()
 export class MarkovOptions extends BaseEntity {
   @PrimaryGeneratedColumn()
-  id: string;
+  id: number;
 
   @Column()
   stateSize: number;

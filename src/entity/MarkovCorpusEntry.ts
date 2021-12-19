@@ -13,7 +13,7 @@ import { MarkovRoot } from './MarkovRoot';
 @Entity()
 export class MarkovCorpusEntry extends BaseEntity {
   @PrimaryGeneratedColumn()
-  id: string;
+  id: number;
 
   @Index()
   @Column()
