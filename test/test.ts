@@ -1,6 +1,6 @@
 import path from 'path';
 import { readFileSync } from 'fs';
-import { Connection, createConnection } from 'typeorm';
+import { Connection, ConnectionOptions, createConnection } from 'typeorm';
 import Markov, { AddDataProps, MarkovResult } from '../src/index';
 import { MarkovCorpusEntry } from '../src/entity/MarkovCorpusEntry';
 import { MarkovFragment } from '../src/entity/MarkovFragment';
@@ -24,6 +24,16 @@ describe('Markov class', () => {
   let connection: Connection;
 
   describe('Constructor', () => {
+    it('should extend a connection', async () => {
+      let customConnection: ConnectionOptions = {
+        entities: ['CustomEntity'],
+        type: 'better-sqlite3',
+        database: 'config/db/db.sqlite3',
+      };
+      customConnection = await Markov.extendConnectionOptions(customConnection);
+      expect(customConnection.entities?.length).toBeGreaterThan(1);
+    });
+
     it('should have a default stateSize', () => {
       const markov = new Markov();
       expect(markov.options.stateSize).toBe(2);
