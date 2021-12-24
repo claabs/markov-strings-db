@@ -476,7 +476,7 @@ export default class Markov {
   }
 
   /**
-   * Delete this instance's entire database and reset the ID
+   * Delete this instance's entire database. The primary ID will persist if provided in the constructor.
    */
   public async delete(): Promise<void> {
     await this.ensureSetup();
