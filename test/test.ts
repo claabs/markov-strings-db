@@ -195,7 +195,7 @@ describe('Markov class', () => {
     });
 
     it('should export the original database values', async () => {
-      markov = new Markov();
+      markov = new Markov({ id: '1', options: { id: '1' } });
       connection = await createConnection();
       await markov.addData(data);
 

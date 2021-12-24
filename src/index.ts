@@ -23,7 +23,7 @@ export type MarkovConstructorOptions = {
   /**
    * Used to set the options database ID manually
    */
-  id?: number;
+  id?: string;
 
   /**
    * The stateSize is the number of words for each "link" of the generated sentence.
@@ -38,7 +38,7 @@ export type MarkovConstructorProps = {
   /**
    * Used to set a root database ID manually
    */
-  id?: number;
+  id?: string;
 
   /**
    * Global Markov corpus generation options
@@ -109,7 +109,7 @@ export default class Markov {
 
   public options: MarkovOptions | MarkovDataMembers;
 
-  public id: number;
+  public id: string;
 
   private defaultOptions: MarkovDataMembers = {
     stateSize: 2,
@@ -150,7 +150,7 @@ export default class Markov {
   }
 
   private construct() {
-    this.id = this.constructorProps?.id || 1;
+    this.id = this.constructorProps?.id || '1';
 
     // Save options
     this.options = Object.assign(this.defaultOptions, this.constructorProps?.options);

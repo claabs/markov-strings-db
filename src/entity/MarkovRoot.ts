@@ -2,10 +2,10 @@ import {
   Entity,
   BaseEntity,
   OneToOne,
-  PrimaryGeneratedColumn,
   OneToMany,
   JoinColumn,
-  ValueTransformer,
+  PrimaryColumn,
+  Generated,
 } from 'typeorm';
 import { MarkovCorpusEntry } from './MarkovCorpusEntry';
 import { MarkovFragment } from './MarkovFragment';
@@ -13,8 +13,9 @@ import { MarkovOptions } from './MarkovOptions';
 
 @Entity()
 export class MarkovRoot extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryColumn({ type: 'text' })
+  @Generated('uuid')
+  id: string;
 
   @OneToMany(() => MarkovCorpusEntry, (entry) => entry.markov, { nullable: true })
   corpus: MarkovCorpusEntry[];
