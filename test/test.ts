@@ -429,8 +429,11 @@ describe('Markov class', () => {
         const afterCorpusEntryCount = await MarkovCorpusEntry.count();
 
         expect(afterInputDataCount).toBeLessThan(beforeInputDataCount);
+        expect(afterInputDataCount).toEqual(38);
         expect(afterFragmentCount).toBeLessThan(beforeFragmentCount);
+        expect(afterFragmentCount).toEqual(38);
         expect(afterCorpusEntryCount).toBeLessThan(beforeCorpusEntryCount);
+        expect(afterCorpusEntryCount).toEqual(25);
       });
     });
   });

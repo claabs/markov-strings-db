@@ -23,10 +23,10 @@ export class MarkovFragment extends BaseEntity {
   @OneToMany(() => MarkovInputData, (ref) => ref.fragment, { nullable: true })
   refs: MarkovInputData[];
 
-  @ManyToOne(() => MarkovRoot, { nullable: true })
+  @ManyToOne(() => MarkovRoot, { nullable: true, onDelete: 'CASCADE' })
   startWordMarkov?: MarkovRoot;
 
-  @ManyToOne(() => MarkovRoot, { nullable: true })
+  @ManyToOne(() => MarkovRoot, { nullable: true, onDelete: 'CASCADE' })
   endWordMarkov?: MarkovRoot;
 
   @ManyToOne(() => MarkovCorpusEntry, { nullable: true, onDelete: 'CASCADE' })

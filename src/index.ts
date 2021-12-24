@@ -480,30 +480,7 @@ export default class Markov {
    */
   public async delete(): Promise<void> {
     await this.ensureSetup();
-    const inputData = await MarkovInputData.find({
-      relations: ['fragment', 'fragment.corpusEntry'],
-      where: [
-        {
-          fragment: { startWordMarkov: this.db },
-        },
-        {
-          fragment: { endWordMarkov: this.db },
-        },
-        {
-          fragment: { corpusEntry: { markov: this.db } },
-        },
-      ],
-    });
-    const uniqueFragments = [
-      ...new Map(inputData.map((d) => [d.fragment.id, d.fragment])).values(),
-    ];
-    const uniqueCorpusEntries = [
-      ...new Map(uniqueFragments.map((f) => [f.corpusEntry?.id, f.corpusEntry])).values(),
-    ].filter((c): c is MarkovCorpusEntry => c !== null);
 
-    await MarkovInputData.remove(inputData);
-    await MarkovFragment.remove(uniqueFragments);
-    await MarkovCorpusEntry.remove(uniqueCorpusEntries);
     if (this.options instanceof MarkovOptions) await MarkovOptions.remove(this.options);
     await MarkovRoot.remove(this.db);
     this.construct();
