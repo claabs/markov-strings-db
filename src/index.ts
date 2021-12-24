@@ -185,7 +185,7 @@ export default class Markov {
   }
 
   private async ensureSetup(): Promise<void> {
-    if (!this.db) await this.setup();
+    if (!this.db?.id) await this.setup();
   }
 
   /**
