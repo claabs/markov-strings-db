@@ -37,5 +37,5 @@ module.exports = {
       }
     },
   },
-  ignorePatterns: ['dist/**', '.eslintrc.js', 'jest.config.js']
+  ignorePatterns: ['dist/**', '.eslintrc.js', 'jest.config.js', 'src/migration/**']
 }

@@ -5,6 +5,7 @@ import { MarkovFragment } from './entity/MarkovFragment';
 import { MarkovInputData } from './entity/MarkovInputData';
 import { MarkovOptions } from './entity/MarkovOptions';
 import { MarkovRoot } from './entity/MarkovRoot';
+import { CreateTables1640838335688 } from './migration/1640838335688-CreateTables';
 import { Importer } from './importer';
 import { MarkovImportExport as MarkovV3ImportExport } from './v3-types';
 
@@ -15,6 +16,7 @@ const ALL_ENTITIES = [
   MarkovInputData,
   MarkovFragment,
 ];
+const ALL_MIGRATIONS = [CreateTables1640838335688];
 
 /**
  * Data to build the Markov instance
@@ -135,9 +137,13 @@ export default class Markov {
     // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any
     const appendedEntities: (Function | string | EntitySchema<any>)[] = ALL_ENTITIES;
     if (baseConnectionOpts.entities) appendedEntities.push(...baseConnectionOpts.entities);
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    const appendedMigrations: (Function | string)[] = ALL_MIGRATIONS;
+    if (baseConnectionOpts.migrations) appendedMigrations.push(...baseConnectionOpts.migrations);
     return {
       ...baseConnectionOpts,
       entities: appendedEntities,
+      migrations: appendedMigrations,
     };
   }
 
