@@ -6,6 +6,7 @@ import { MarkovInputData } from './entity/MarkovInputData';
 import { MarkovOptions } from './entity/MarkovOptions';
 import { MarkovRoot } from './entity/MarkovRoot';
 import { CreateTables1640838335688 } from './migration/1640838335688-CreateTables';
+import { InputDataIndices1640929645188 } from './migration/1640929645188-InputDataIndices';
 import { Importer } from './importer';
 import { MarkovImportExport as MarkovV3ImportExport } from './v3-types';
 
@@ -16,7 +17,7 @@ const ALL_ENTITIES = [
   MarkovInputData,
   MarkovFragment,
 ];
-const ALL_MIGRATIONS = [CreateTables1640838335688];
+const ALL_MIGRATIONS = [CreateTables1640838335688, InputDataIndices1640929645188];
 
 /**
  * Data to build the Markov instance
