@@ -66,6 +66,11 @@ export interface AddDataProps {
    * A JSON-like object that will be returned alongside the refs in the result
    */
   custom?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+  /**
+   * A list of strings that will be stored alongside the string to be used for later retreival/deletion
+   */
+  tags?: string[];
 }
 
 export interface MarkovResult<CustomData = never> {
@@ -338,6 +343,7 @@ export default class Markov {
           inputData.fragment = oldStartObj;
           inputData.string = item.string;
           inputData.custom = item.custom;
+          inputData.tags = item.tags;
           inputDataToSave.push(inputData);
         }
       } else {
@@ -350,6 +356,7 @@ export default class Markov {
         ref.fragment = fragment;
         ref.string = item.string;
         ref.custom = item.custom;
+        ref.tags = item.tags;
         inputDataToSave.push(ref);
       }
 
@@ -368,6 +375,7 @@ export default class Markov {
           inputData.fragment = oldEndObj;
           inputData.string = item.string;
           inputData.custom = item.custom;
+          inputData.tags = item.tags;
           inputDataToSave.push(inputData);
         }
       } else {
@@ -379,6 +387,7 @@ export default class Markov {
         ref.fragment = fragment;
         ref.string = item.string;
         ref.custom = item.custom;
+        ref.tags = item.tags;
         inputDataToSave.push(ref);
       }
 
@@ -408,6 +417,7 @@ export default class Markov {
             ref.fragment = oldObj;
             ref.string = item.string;
             ref.custom = item.custom;
+            ref.tags = item.tags;
             inputDataToSave.push(ref);
           } else {
             // Add the new "next" block in the list of possible paths for "curr"
@@ -419,6 +429,7 @@ export default class Markov {
             ref.fragment = fragment;
             ref.string = item.string;
             ref.custom = item.custom;
+            ref.tags = item.tags;
             inputDataToSave.push(ref);
           }
         } else {
@@ -435,6 +446,7 @@ export default class Markov {
           ref.fragment = fragment;
           ref.string = item.string;
           ref.custom = item.custom;
+          ref.tags = item.tags;
           inputDataToSave.push(ref);
         }
       }
@@ -447,7 +459,8 @@ export default class Markov {
   }
 
   /**
-   * Remove a string and all its references from the database
+   * Remove a string and all its references from the database.
+   * Not really performant enough to handle a massive list of deletions.
    * @param rawData A list of full strings
    */
   public async removeData(rawData: string[]): Promise<void> {
@@ -469,16 +482,7 @@ export default class Markov {
         },
       ],
     });
-    const uniqueFragments = [
-      ...new Map(inputData.map((d) => [d.fragment.id, d.fragment])).values(),
-    ];
-    const uniqueCorpusEntries = [
-      ...new Map(uniqueFragments.map((f) => [f.corpusEntry?.id, f.corpusEntry])).values(),
-    ].filter((c): c is MarkovCorpusEntry => c !== null);
-
     await MarkovInputData.remove(inputData);
-    await MarkovFragment.remove(uniqueFragments);
-    await MarkovCorpusEntry.remove(uniqueCorpusEntries);
   }
 
   /**

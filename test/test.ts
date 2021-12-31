@@ -318,8 +318,8 @@ describe('Markov class', () => {
           const sentence = await markov.generate<CustomData>({ maxTries: 20 });
           expect(sentence.tries).toBeLessThanOrEqual(20);
           sentence.refs.forEach((ref) => {
-            expect(ref.custom.index).toBeGreaterThanOrEqual(0);
-            expect(ref.custom.otherString).toMatch(/\d+/);
+            expect(ref.custom?.index).toBeGreaterThanOrEqual(0);
+            expect(ref.custom?.otherString).toMatch(/\d+/);
           });
         });
         await Promise.all(promises);
@@ -423,6 +423,48 @@ describe('Markov class', () => {
         const beforeCorpusEntryCount = await MarkovCorpusEntry.count();
 
         await markov.removeData([deletePhrase]);
+
+        const afterInputDataCount = await MarkovInputData.count();
+        const afterFragmentCount = await MarkovFragment.count();
+        const afterCorpusEntryCount = await MarkovCorpusEntry.count();
+
+        expect(afterInputDataCount).toBeLessThan(beforeInputDataCount);
+        expect(afterInputDataCount).toEqual(38);
+        expect(afterFragmentCount).toBeLessThan(beforeFragmentCount);
+        expect(afterFragmentCount).toEqual(38);
+        expect(afterCorpusEntryCount).toBeLessThan(beforeCorpusEntryCount);
+        expect(afterCorpusEntryCount).toEqual(25);
+      });
+    });
+
+    describe('With tagged data', () => {
+      beforeEach(async () => {
+        markov = new Markov();
+        connection = await createConnection();
+
+        const customData: AddDataProps[] = data.map((datum, idx) => ({
+          string: datum,
+          tags: [`message-${idx}`, 'other-tag'],
+        }));
+        await markov.addData(customData);
+      });
+
+      afterEach(async () => {
+        await connection.dropDatabase();
+        await connection.close();
+      });
+
+      it(`should erase using the tags`, async () => {
+        const beforeInputDataCount = await MarkovInputData.count();
+        const beforeFragmentCount = await MarkovFragment.count();
+        const beforeCorpusEntryCount = await MarkovCorpusEntry.count();
+
+        const inputData = await MarkovInputData.createQueryBuilder('input')
+          .leftJoinAndSelect('input.fragment', 'fragment')
+          .leftJoinAndSelect('fragment.corpusEntry', 'corpusEntry')
+          .where('input.tags like :tags', { tags: `%message-3%` })
+          .getMany();
+        await MarkovInputData.remove(inputData);
 
         const afterInputDataCount = await MarkovInputData.count();
         const afterFragmentCount = await MarkovFragment.count();

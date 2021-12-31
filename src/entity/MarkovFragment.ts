@@ -6,6 +6,7 @@ import {
   ManyToOne,
   Index,
   OneToMany,
+  AfterRemove,
 } from 'typeorm';
 import { MarkovCorpusEntry } from './MarkovCorpusEntry';
 import { MarkovInputData } from './MarkovInputData';
@@ -20,7 +21,7 @@ export class MarkovFragment extends BaseEntity {
   @Column()
   words: string;
 
-  @OneToMany(() => MarkovInputData, (ref) => ref.fragment, { nullable: true })
+  @OneToMany(() => MarkovInputData, (ref) => ref.fragment, { nullable: true, onDelete: 'CASCADE' })
   refs: MarkovInputData[];
 
   @ManyToOne(() => MarkovRoot, { nullable: true, onDelete: 'CASCADE' })
@@ -31,4 +32,11 @@ export class MarkovFragment extends BaseEntity {
 
   @ManyToOne(() => MarkovCorpusEntry, { nullable: true, onDelete: 'CASCADE' })
   corpusEntry?: MarkovCorpusEntry;
+
+  @AfterRemove()
+  async removeRelations() {
+    if (this.startWordMarkov) await this.startWordMarkov.remove();
+    if (this.endWordMarkov) await this.endWordMarkov.remove();
+    if (this.corpusEntry) await this.corpusEntry.remove();
+  }
 }
