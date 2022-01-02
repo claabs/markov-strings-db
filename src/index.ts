@@ -430,8 +430,8 @@ export default class Markov {
   public async delete(): Promise<void> {
     await this.ensureSetup();
 
-    if (this.options instanceof MarkovOptions) await MarkovOptions.remove(this.options);
-    await MarkovRoot.remove(this.db);
+    if (this.options instanceof MarkovOptions) await MarkovOptions.delete(this.options);
+    await MarkovRoot.delete(this.db);
     this.construct();
   }
 
