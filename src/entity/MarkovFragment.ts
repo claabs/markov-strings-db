@@ -15,12 +15,15 @@ export class MarkovFragment extends BaseEntity {
   @ManyToOne(() => MarkovInputData, { onDelete: 'CASCADE' })
   ref: MarkovInputData;
 
+  @Index()
   @ManyToOne(() => MarkovRoot, { nullable: true, onDelete: 'CASCADE' })
   startWordMarkov?: MarkovRoot;
 
+  @Index()
   @ManyToOne(() => MarkovRoot, { nullable: true, onDelete: 'CASCADE' })
   endWordMarkov?: MarkovRoot;
 
+  @Index()
   @ManyToOne(() => MarkovCorpusEntry, {
     nullable: true,
     onDelete: 'CASCADE',

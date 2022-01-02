@@ -6,6 +6,7 @@ import { MarkovInputData } from './entity/MarkovInputData';
 import { MarkovOptions } from './entity/MarkovOptions';
 import { MarkovRoot } from './entity/MarkovRoot';
 import { CreateTables1641083518573 } from './migration/1641083518573-CreateTables';
+import { AddRelationIndices1641146075940 } from './migration/1641146075940-AddRelationIndices';
 import { getV3ImportInputData } from './importer';
 import { MarkovImportExport as MarkovV3ImportExport } from './v3-types';
 
@@ -16,7 +17,7 @@ const ALL_ENTITIES = [
   MarkovInputData,
   MarkovFragment,
 ];
-const ALL_MIGRATIONS = [CreateTables1641083518573];
+const ALL_MIGRATIONS = [CreateTables1641083518573, AddRelationIndices1641146075940];
 
 /**
  * Data to build the Markov instance
@@ -391,24 +392,23 @@ export default class Markov {
 
   /**
    * Remove a string and all its references from the database.
-   * Not really performant enough to handle a massive list of deletions.
    * @param rawData A list of full strings
    */
   public async removeStrings(rawData: string[]): Promise<void> {
     await this.ensureSetup();
-    const inputData = await MarkovInputData.find({
-      where: {
+    await MarkovInputData.createQueryBuilder()
+      .delete()
+      .from(MarkovInputData)
+      .where({
         string: rawData,
         markov: this.db,
-      },
-    });
-    await MarkovInputData.remove(inputData);
+      })
+      .execute();
     await Markov.pruneDanglingCorpusEntries();
   }
 
   /**
    * Remove all data with a specific tag associated with it references from the database.
-   * Not really performant enough to handle a massive list of deletions.
    * @param tags A list of tags
    */
   public async removeTags(tags: string[]): Promise<void> {

@@ -22,6 +22,7 @@ export class MarkovCorpusEntry extends BaseEntity {
   @OneToMany(() => MarkovFragment, (fragment) => fragment.corpusEntry, { nullable: true })
   fragments: MarkovFragment[];
 
+  @Index()
   @ManyToOne(() => MarkovRoot, { nullable: true, onDelete: 'CASCADE' })
   markov: MarkovRoot;
 }

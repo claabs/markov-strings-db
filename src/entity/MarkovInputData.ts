@@ -27,6 +27,7 @@ export class MarkovInputData<CustomData = any> extends BaseEntity {
   @Column('simple-json', { nullable: true })
   custom?: CustomData;
 
+  @Index()
   @ManyToOne(() => MarkovRoot, { nullable: true, onDelete: 'CASCADE' })
   markov: MarkovRoot;
 
