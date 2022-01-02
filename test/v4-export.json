@@ -10,6 +10,12 @@
         {
           "id": 1,
           "words": "Lorem ipsum",
+          "ref": {
+            "id": 1,
+            "string": "Lorem ipsum dolor sit amet",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": {
             "id": "1"
           },
@@ -19,6 +25,12 @@
         {
           "id": 2,
           "words": "sit amet",
+          "ref": {
+            "id": 1,
+            "string": "Lorem ipsum dolor sit amet",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": {
             "id": "1"
@@ -28,6 +40,12 @@
         {
           "id": 3,
           "words": "dolor sit",
+          "ref": {
+            "id": 1,
+            "string": "Lorem ipsum dolor sit amet",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -41,6 +59,12 @@
         {
           "id": 4,
           "words": "sit amet",
+          "ref": {
+            "id": 1,
+            "string": "Lorem ipsum dolor sit amet",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -62,6 +86,12 @@
         {
           "id": 5,
           "words": "Lorem ipsum",
+          "ref": {
+            "id": 2,
+            "string": "Lorem ipsum duplicate start words",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": {
             "id": "1"
           },
@@ -71,6 +101,12 @@
         {
           "id": 6,
           "words": "start words",
+          "ref": {
+            "id": 2,
+            "string": "Lorem ipsum duplicate start words",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": {
             "id": "1"
@@ -80,6 +116,12 @@
         {
           "id": 7,
           "words": "duplicate start",
+          "ref": {
+            "id": 2,
+            "string": "Lorem ipsum duplicate start words",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -93,6 +135,12 @@
         {
           "id": 8,
           "words": "start words",
+          "ref": {
+            "id": 2,
+            "string": "Lorem ipsum duplicate start words",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -114,6 +162,12 @@
         {
           "id": 9,
           "words": "Consectetur adipiscing",
+          "ref": {
+            "id": 3,
+            "string": "Consectetur adipiscing elit",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": {
             "id": "1"
           },
@@ -123,6 +177,12 @@
         {
           "id": 10,
           "words": "adipiscing elit",
+          "ref": {
+            "id": 3,
+            "string": "Consectetur adipiscing elit",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": {
             "id": "1"
@@ -140,6 +200,12 @@
         {
           "id": 11,
           "words": "Quisque tempor,",
+          "ref": {
+            "id": 4,
+            "string": "Quisque tempor, erat vel lacinia imperdiet",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": {
             "id": "1"
           },
@@ -149,6 +215,12 @@
         {
           "id": 12,
           "words": "lacinia imperdiet",
+          "ref": {
+            "id": 4,
+            "string": "Quisque tempor, erat vel lacinia imperdiet",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": {
             "id": "1"
@@ -158,6 +230,12 @@
         {
           "id": 13,
           "words": "erat vel",
+          "ref": {
+            "id": 4,
+            "string": "Quisque tempor, erat vel lacinia imperdiet",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -171,6 +249,12 @@
         {
           "id": 14,
           "words": "vel lacinia",
+          "ref": {
+            "id": 4,
+            "string": "Quisque tempor, erat vel lacinia imperdiet",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -184,6 +268,12 @@
         {
           "id": 15,
           "words": "lacinia imperdiet",
+          "ref": {
+            "id": 4,
+            "string": "Quisque tempor, erat vel lacinia imperdiet",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -205,6 +295,12 @@
         {
           "id": 16,
           "words": "Justo nisi",
+          "ref": {
+            "id": 5,
+            "string": "Justo nisi fringilla dui",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": {
             "id": "1"
           },
@@ -214,6 +310,12 @@
         {
           "id": 17,
           "words": "fringilla dui",
+          "ref": {
+            "id": 5,
+            "string": "Justo nisi fringilla dui",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": {
             "id": "1"
@@ -223,6 +325,12 @@
         {
           "id": 18,
           "words": "fringilla dui",
+          "ref": {
+            "id": 5,
+            "string": "Justo nisi fringilla dui",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -244,6 +352,12 @@
         {
           "id": 19,
           "words": "Egestas bibendum",
+          "ref": {
+            "id": 6,
+            "string": "Egestas bibendum eros nisi ut lacus",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": {
             "id": "1"
           },
@@ -253,6 +367,12 @@
         {
           "id": 20,
           "words": "ut lacus",
+          "ref": {
+            "id": 6,
+            "string": "Egestas bibendum eros nisi ut lacus",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": {
             "id": "1"
@@ -262,6 +382,12 @@
         {
           "id": 21,
           "words": "eros nisi",
+          "ref": {
+            "id": 6,
+            "string": "Egestas bibendum eros nisi ut lacus",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -275,6 +401,12 @@
         {
           "id": 22,
           "words": "nisi ut",
+          "ref": {
+            "id": 6,
+            "string": "Egestas bibendum eros nisi ut lacus",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -288,6 +420,12 @@
         {
           "id": 23,
           "words": "ut lacus",
+          "ref": {
+            "id": 6,
+            "string": "Egestas bibendum eros nisi ut lacus",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -309,6 +447,12 @@
         {
           "id": 24,
           "words": "fringilla dui",
+          "ref": {
+            "id": 7,
+            "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": {
             "id": "1"
           },
@@ -318,6 +462,12 @@
         {
           "id": 25,
           "words": "est rien…",
+          "ref": {
+            "id": 7,
+            "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": {
             "id": "1"
@@ -327,6 +477,12 @@
         {
           "id": 26,
           "words": "avait annoncé",
+          "ref": {
+            "id": 7,
+            "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -340,6 +496,12 @@
         {
           "id": 27,
           "words": "annoncé une",
+          "ref": {
+            "id": 7,
+            "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -353,6 +515,12 @@
         {
           "id": 28,
           "words": "une rupture",
+          "ref": {
+            "id": 7,
+            "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -366,6 +534,12 @@
         {
           "id": 29,
           "words": "rupture avec",
+          "ref": {
+            "id": 7,
+            "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -379,6 +553,12 @@
         {
           "id": 30,
           "words": "avec le",
+          "ref": {
+            "id": 7,
+            "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -392,6 +572,12 @@
         {
           "id": 31,
           "words": "le erat",
+          "ref": {
+            "id": 7,
+            "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -405,6 +591,12 @@
         {
           "id": 32,
           "words": "erat vel:",
+          "ref": {
+            "id": 7,
+            "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -418,6 +610,12 @@
         {
           "id": 33,
           "words": "vel: il",
+          "ref": {
+            "id": 7,
+            "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -431,6 +629,12 @@
         {
           "id": 34,
           "words": "il n'en",
+          "ref": {
+            "id": 7,
+            "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -444,6 +648,12 @@
         {
           "id": 35,
           "words": "n'en est",
+          "ref": {
+            "id": 7,
+            "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -457,6 +667,12 @@
         {
           "id": 36,
           "words": "est rien…",
+          "ref": {
+            "id": 7,
+            "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -478,6 +694,12 @@
         {
           "id": 37,
           "words": "Fusce tincidunt",
+          "ref": {
+            "id": 8,
+            "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": {
             "id": "1"
           },
@@ -487,6 +709,12 @@
         {
           "id": 38,
           "words": "lacinia imperdiet",
+          "ref": {
+            "id": 8,
+            "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": {
             "id": "1"
@@ -496,6 +724,12 @@
         {
           "id": 39,
           "words": "tempor, erat",
+          "ref": {
+            "id": 8,
+            "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -509,6 +743,12 @@
         {
           "id": 40,
           "words": "erat vel",
+          "ref": {
+            "id": 8,
+            "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -522,6 +762,12 @@
         {
           "id": 41,
           "words": "vel lacinia",
+          "ref": {
+            "id": 8,
+            "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -535,6 +781,12 @@
         {
           "id": 42,
           "words": "lacinia vel",
+          "ref": {
+            "id": 8,
+            "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -548,6 +800,12 @@
         {
           "id": 43,
           "words": "vel ex",
+          "ref": {
+            "id": 8,
+            "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -561,6 +819,12 @@
         {
           "id": 44,
           "words": "ex pharetra",
+          "ref": {
+            "id": 8,
+            "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -574,6 +838,12 @@
         {
           "id": 45,
           "words": "pharetra pretium",
+          "ref": {
+            "id": 8,
+            "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -587,6 +857,12 @@
         {
           "id": 46,
           "words": "pretium lacinia",
+          "ref": {
+            "id": 8,
+            "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {
@@ -600,6 +876,12 @@
         {
           "id": 47,
           "words": "lacinia imperdiet",
+          "ref": {
+            "id": 8,
+            "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet",
+            "tags": null,
+            "custom": null
+          },
           "startWordMarkov": null,
           "endWordMarkov": null,
           "corpusEntry": {

@@ -269,6 +269,7 @@ export default class Markov {
       relations: [
         'inputData',
         'inputData.fragments',
+        'inputData.fragments.ref',
         'inputData.fragments.startWordMarkov',
         'inputData.fragments.endWordMarkov',
         'inputData.fragments.corpusEntry',
@@ -502,12 +503,15 @@ export default class Markov {
         .join(' ')
         .trim();
 
-      const refs = arr.map((elem) => elem.ref);
+      const uniqueRefs = arr.reduce(
+        (refMap, elem) => refMap.set(elem.ref.id, elem.ref),
+        new Map<number, MarkovInputData>()
+      );
 
       const result = {
         string: sentence,
         score,
-        refs,
+        refs: Array.from(uniqueRefs.values()),
         tries,
       };
 
