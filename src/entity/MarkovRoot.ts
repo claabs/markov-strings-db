@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { MarkovCorpusEntry } from './MarkovCorpusEntry';
 import { MarkovFragment } from './MarkovFragment';
+import { MarkovInputData } from './MarkovInputData';
 import { MarkovOptions } from './MarkovOptions';
 
 @Entity()
@@ -16,6 +17,9 @@ export class MarkovRoot extends BaseEntity {
   @PrimaryColumn({ type: 'text' })
   @Generated('uuid')
   id: string;
+
+  @OneToMany(() => MarkovInputData, (inputData) => inputData.markov, { nullable: true })
+  inputData: MarkovInputData[];
 
   @OneToMany(() => MarkovCorpusEntry, (entry) => entry.markov, { nullable: true })
   corpus: MarkovCorpusEntry[];

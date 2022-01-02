@@ -1,14 +1,15 @@
 /* eslint-disable import/no-cycle, @typescript-eslint/no-explicit-any */
 import {
-  AfterRemove,
   BaseEntity,
   Column,
   Entity,
   Index,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { MarkovFragment } from './MarkovFragment';
+import { MarkovRoot } from './MarkovRoot';
 
 @Entity()
 export class MarkovInputData<CustomData = any> extends BaseEntity {
@@ -26,11 +27,9 @@ export class MarkovInputData<CustomData = any> extends BaseEntity {
   @Column('simple-json', { nullable: true })
   custom?: CustomData;
 
-  @ManyToOne(() => MarkovFragment, { nullable: true, onDelete: 'CASCADE' })
-  fragment: MarkovFragment;
+  @ManyToOne(() => MarkovRoot, { nullable: true, onDelete: 'CASCADE' })
+  markov: MarkovRoot;
 
-  @AfterRemove()
-  async removeFragment() {
-    if (this.fragment) await this.fragment.remove();
-  }
+  @OneToMany(() => MarkovFragment, (fragment) => fragment.ref)
+  fragments: MarkovFragment[];
 }

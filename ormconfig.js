@@ -5,7 +5,6 @@ module.exports = {
       : 'config/db/db.sqlite3',
     synchronize: true,
     migrationsRun: false,
-    // logging: true,
     // logging: "all",
     enableWAL: true,
     autoLoadEntities: true,

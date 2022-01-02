@@ -131,7 +131,7 @@ describe('Markov class', () => {
         const count = await MarkovFragment.count({
           startWordMarkov: markov.db,
         });
-        expect(count).toEqual(7);
+        expect(count).toEqual(8); // This is a change from v3's 7 as this version keeps duplicates
       });
     });
 
@@ -140,7 +140,7 @@ describe('Markov class', () => {
         const count = await MarkovFragment.count({
           endWordMarkov: markov.db,
         });
-        expect(count).toEqual(7);
+        expect(count).toEqual(8); // This is a change from v3's 7 as this version keeps duplicates
       });
 
       it('should contain the right values', async () => {
@@ -422,18 +422,15 @@ describe('Markov class', () => {
         const beforeFragmentCount = await MarkovFragment.count();
         const beforeCorpusEntryCount = await MarkovCorpusEntry.count();
 
-        await markov.removeData([deletePhrase]);
+        await markov.removeStrings([deletePhrase]);
 
         const afterInputDataCount = await MarkovInputData.count();
         const afterFragmentCount = await MarkovFragment.count();
         const afterCorpusEntryCount = await MarkovCorpusEntry.count();
 
-        expect(afterInputDataCount).toBeLessThan(beforeInputDataCount);
-        expect(afterInputDataCount).toEqual(38);
-        expect(afterFragmentCount).toBeLessThan(beforeFragmentCount);
-        expect(afterFragmentCount).toEqual(38);
-        expect(afterCorpusEntryCount).toBeLessThan(beforeCorpusEntryCount);
-        expect(afterCorpusEntryCount).toEqual(25);
+        expect(afterInputDataCount).toEqual(beforeInputDataCount - 1);
+        expect(afterFragmentCount).toEqual(beforeFragmentCount - 5);
+        expect(afterCorpusEntryCount).toEqual(beforeCorpusEntryCount - 1);
       });
     });
 
@@ -459,23 +456,15 @@ describe('Markov class', () => {
         const beforeFragmentCount = await MarkovFragment.count();
         const beforeCorpusEntryCount = await MarkovCorpusEntry.count();
 
-        const inputData = await MarkovInputData.createQueryBuilder('input')
-          .leftJoinAndSelect('input.fragment', 'fragment')
-          .leftJoinAndSelect('fragment.corpusEntry', 'corpusEntry')
-          .where('input.tags like :tags', { tags: `%message-3%` })
-          .getMany();
-        await MarkovInputData.remove(inputData);
+        await markov.removeTags(['message-3']);
 
         const afterInputDataCount = await MarkovInputData.count();
         const afterFragmentCount = await MarkovFragment.count();
         const afterCorpusEntryCount = await MarkovCorpusEntry.count();
 
-        expect(afterInputDataCount).toBeLessThan(beforeInputDataCount);
-        expect(afterInputDataCount).toEqual(38);
-        expect(afterFragmentCount).toBeLessThan(beforeFragmentCount);
-        expect(afterFragmentCount).toEqual(38);
-        expect(afterCorpusEntryCount).toBeLessThan(beforeCorpusEntryCount);
-        expect(afterCorpusEntryCount).toEqual(25);
+        expect(afterInputDataCount).toEqual(beforeInputDataCount - 1);
+        expect(afterFragmentCount).toEqual(beforeFragmentCount - 5);
+        expect(afterCorpusEntryCount).toEqual(beforeCorpusEntryCount - 1);
       });
     });
   });

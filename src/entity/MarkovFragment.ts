@@ -1,13 +1,4 @@
-import {
-  Entity,
-  BaseEntity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  Index,
-  OneToMany,
-  AfterRemove,
-} from 'typeorm';
+import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, ManyToOne, Index } from 'typeorm';
 import { MarkovCorpusEntry } from './MarkovCorpusEntry';
 import { MarkovInputData } from './MarkovInputData';
 import { MarkovRoot } from './MarkovRoot';
@@ -21,8 +12,8 @@ export class MarkovFragment extends BaseEntity {
   @Column()
   words: string;
 
-  @OneToMany(() => MarkovInputData, (ref) => ref.fragment, { nullable: true, onDelete: 'CASCADE' })
-  refs: MarkovInputData[];
+  @ManyToOne(() => MarkovInputData, { onDelete: 'CASCADE' })
+  ref: MarkovInputData;
 
   @ManyToOne(() => MarkovRoot, { nullable: true, onDelete: 'CASCADE' })
   startWordMarkov?: MarkovRoot;
@@ -30,13 +21,10 @@ export class MarkovFragment extends BaseEntity {
   @ManyToOne(() => MarkovRoot, { nullable: true, onDelete: 'CASCADE' })
   endWordMarkov?: MarkovRoot;
 
-  @ManyToOne(() => MarkovCorpusEntry, { nullable: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => MarkovCorpusEntry, {
+    nullable: true,
+    onDelete: 'CASCADE',
+    cascade: ['update', 'insert'],
+  })
   corpusEntry?: MarkovCorpusEntry;
-
-  @AfterRemove()
-  async removeRelations() {
-    if (this.startWordMarkov) await this.startWordMarkov.remove();
-    if (this.endWordMarkov) await this.endWordMarkov.remove();
-    if (this.corpusEntry) await this.corpusEntry.remove();
-  }
 }

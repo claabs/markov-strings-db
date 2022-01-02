@@ -1,8 +1,10 @@
-export type MarkovInputData = {
+export type MarkovInputDatum = {
   string: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
-}[];
+};
+
+export type MarkovInputData = MarkovInputDatum[];
 
 /**
  * Data to build the Markov instance

@@ -1,670 +1,620 @@
 {
-    "id": "1",
-    "corpus": [
+  "id": "1",
+  "inputData": [
+    {
+      "id": 1,
+      "string": "Lorem ipsum dolor sit amet",
+      "tags": null,
+      "custom": null,
+      "fragments": [
         {
+          "id": 1,
+          "words": "Lorem ipsum",
+          "startWordMarkov": {
+            "id": "1"
+          },
+          "endWordMarkov": null,
+          "corpusEntry": null
+        },
+        {
+          "id": 3,
+          "words": "dolor sit",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
             "id": 1,
             "block": "Lorem ipsum",
-            "fragments": [
-                {
-                    "id": 3,
-                    "words": "dolor sit",
-                    "refs": [
-                        {
-                            "id": 3,
-                            "string": "Lorem ipsum dolor sit amet",
-                            "custom": null
-                        }
-                    ]
-                },
-                {
-                    "id": 6,
-                    "words": "duplicate start",
-                    "refs": [
-                        {
-                            "id": 6,
-                            "string": "Lorem ipsum duplicate start words",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
+            "markov": {
+              "id": "1"
+            }
+          }
         },
         {
+          "id": 4,
+          "words": "sit amet",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
             "id": 2,
             "block": "ipsum dolor",
-            "fragments": [
-                {
-                    "id": 4,
-                    "words": "sit amet",
-                    "refs": [
-                        {
-                            "id": 4,
-                            "string": "Lorem ipsum dolor sit amet",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
+            "markov": {
+              "id": "1"
+            }
+          }
         },
         {
+          "id": 2,
+          "words": "sit amet",
+          "startWordMarkov": null,
+          "endWordMarkov": {
+            "id": "1"
+          },
+          "corpusEntry": null
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "string": "Lorem ipsum duplicate start words",
+      "tags": null,
+      "custom": null,
+      "fragments": [
+        {
+          "id": 5,
+          "words": "Lorem ipsum",
+          "startWordMarkov": {
+            "id": "1"
+          },
+          "endWordMarkov": null,
+          "corpusEntry": null
+        },
+        {
+          "id": 7,
+          "words": "duplicate start",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
+            "id": 1,
+            "block": "Lorem ipsum",
+            "markov": {
+              "id": "1"
+            }
+          }
+        },
+        {
+          "id": 8,
+          "words": "start words",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
             "id": 3,
             "block": "ipsum duplicate",
-            "fragments": [
-                {
-                    "id": 7,
-                    "words": "start words",
-                    "refs": [
-                        {
-                            "id": 7,
-                            "string": "Lorem ipsum duplicate start words",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
+            "markov": {
+              "id": "1"
+            }
+          }
         },
         {
+          "id": 6,
+          "words": "start words",
+          "startWordMarkov": null,
+          "endWordMarkov": {
+            "id": "1"
+          },
+          "corpusEntry": null
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "string": "Consectetur adipiscing elit",
+      "tags": null,
+      "custom": null,
+      "fragments": [
+        {
+          "id": 9,
+          "words": "Consectetur adipiscing",
+          "startWordMarkov": {
+            "id": "1"
+          },
+          "endWordMarkov": null,
+          "corpusEntry": null
+        },
+        {
+          "id": 10,
+          "words": "adipiscing elit",
+          "startWordMarkov": null,
+          "endWordMarkov": {
+            "id": "1"
+          },
+          "corpusEntry": null
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "string": "Quisque tempor, erat vel lacinia imperdiet",
+      "tags": null,
+      "custom": null,
+      "fragments": [
+        {
+          "id": 11,
+          "words": "Quisque tempor,",
+          "startWordMarkov": {
+            "id": "1"
+          },
+          "endWordMarkov": null,
+          "corpusEntry": null
+        },
+        {
+          "id": 13,
+          "words": "erat vel",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
             "id": 4,
             "block": "Quisque tempor,",
-            "fragments": [
-                {
-                    "id": 12,
-                    "words": "erat vel",
-                    "refs": [
-                        {
-                            "id": 12,
-                            "string": "Quisque tempor, erat vel lacinia imperdiet",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
+            "markov": {
+              "id": "1"
+            }
+          }
         },
         {
-            "id": 5,
-            "block": "tempor, erat",
-            "fragments": [
-                {
-                    "id": 13,
-                    "words": "vel lacinia",
-                    "refs": [
-                        {
-                            "id": 39,
-                            "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet",
-                            "custom": null
-                        },
-                        {
-                            "id": 13,
-                            "string": "Quisque tempor, erat vel lacinia imperdiet",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
-        },
-        {
+          "id": 15,
+          "words": "lacinia imperdiet",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
             "id": 6,
             "block": "erat vel",
-            "fragments": [
-                {
-                    "id": 14,
-                    "words": "lacinia imperdiet",
-                    "refs": [
-                        {
-                            "id": 14,
-                            "string": "Quisque tempor, erat vel lacinia imperdiet",
-                            "custom": null
-                        }
-                    ]
-                },
-                {
-                    "id": 39,
-                    "words": "lacinia vel",
-                    "refs": [
-                        {
-                            "id": 40,
-                            "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
+            "markov": {
+              "id": "1"
+            }
+          }
         },
         {
+          "id": 12,
+          "words": "lacinia imperdiet",
+          "startWordMarkov": null,
+          "endWordMarkov": {
+            "id": "1"
+          },
+          "corpusEntry": null
+        },
+        {
+          "id": 14,
+          "words": "vel lacinia",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
+            "id": 5,
+            "block": "tempor, erat",
+            "markov": {
+              "id": "1"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "string": "Justo nisi fringilla dui",
+      "tags": null,
+      "custom": null,
+      "fragments": [
+        {
+          "id": 16,
+          "words": "Justo nisi",
+          "startWordMarkov": {
+            "id": "1"
+          },
+          "endWordMarkov": null,
+          "corpusEntry": null
+        },
+        {
+          "id": 18,
+          "words": "fringilla dui",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
             "id": 7,
             "block": "Justo nisi",
-            "fragments": [
-                {
-                    "id": 17,
-                    "words": "fringilla dui",
-                    "refs": [
-                        {
-                            "id": 17,
-                            "string": "Justo nisi fringilla dui",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
+            "markov": {
+              "id": "1"
+            }
+          }
         },
         {
+          "id": 17,
+          "words": "fringilla dui",
+          "startWordMarkov": null,
+          "endWordMarkov": {
+            "id": "1"
+          },
+          "corpusEntry": null
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "string": "Egestas bibendum eros nisi ut lacus",
+      "tags": null,
+      "custom": null,
+      "fragments": [
+        {
+          "id": 19,
+          "words": "Egestas bibendum",
+          "startWordMarkov": {
+            "id": "1"
+          },
+          "endWordMarkov": null,
+          "corpusEntry": null
+        },
+        {
+          "id": 21,
+          "words": "eros nisi",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
             "id": 8,
             "block": "Egestas bibendum",
-            "fragments": [
-                {
-                    "id": 20,
-                    "words": "eros nisi",
-                    "refs": [
-                        {
-                            "id": 20,
-                            "string": "Egestas bibendum eros nisi ut lacus",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
+            "markov": {
+              "id": "1"
+            }
+          }
         },
         {
+          "id": 22,
+          "words": "nisi ut",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
             "id": 9,
             "block": "bibendum eros",
-            "fragments": [
-                {
-                    "id": 21,
-                    "words": "nisi ut",
-                    "refs": [
-                        {
-                            "id": 21,
-                            "string": "Egestas bibendum eros nisi ut lacus",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
+            "markov": {
+              "id": "1"
+            }
+          }
         },
         {
+          "id": 23,
+          "words": "ut lacus",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
             "id": 10,
             "block": "eros nisi",
-            "fragments": [
-                {
-                    "id": 22,
-                    "words": "ut lacus",
-                    "refs": [
-                        {
-                            "id": 22,
-                            "string": "Egestas bibendum eros nisi ut lacus",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
+            "markov": {
+              "id": "1"
+            }
+          }
         },
         {
-            "id": 11,
-            "block": "fringilla dui",
-            "fragments": [
-                {
-                    "id": 25,
-                    "words": "avait annoncé",
-                    "refs": [
-                        {
-                            "id": 25,
-                            "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
-        },
+          "id": 20,
+          "words": "ut lacus",
+          "startWordMarkov": null,
+          "endWordMarkov": {
+            "id": "1"
+          },
+          "corpusEntry": null
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
+      "tags": null,
+      "custom": null,
+      "fragments": [
         {
+          "id": 27,
+          "words": "annoncé une",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
             "id": 12,
             "block": "dui avait",
-            "fragments": [
-                {
-                    "id": 26,
-                    "words": "annoncé une",
-                    "refs": [
-                        {
-                            "id": 26,
-                            "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
+            "markov": {
+              "id": "1"
+            }
+          }
         },
         {
-            "id": 13,
-            "block": "avait annoncé",
-            "fragments": [
-                {
-                    "id": 27,
-                    "words": "une rupture",
-                    "refs": [
-                        {
-                            "id": 27,
-                            "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
+          "id": 26,
+          "words": "avait annoncé",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
+            "id": 11,
+            "block": "fringilla dui",
+            "markov": {
+              "id": "1"
+            }
+          }
         },
         {
-            "id": 14,
-            "block": "annoncé une",
-            "fragments": [
-                {
-                    "id": 28,
-                    "words": "rupture avec",
-                    "refs": [
-                        {
-                            "id": 28,
-                            "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
-        },
-        {
+          "id": 30,
+          "words": "avec le",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
             "id": 15,
             "block": "une rupture",
-            "fragments": [
-                {
-                    "id": 29,
-                    "words": "avec le",
-                    "refs": [
-                        {
-                            "id": 29,
-                            "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
+            "markov": {
+              "id": "1"
+            }
+          }
         },
         {
-            "id": 16,
-            "block": "rupture avec",
-            "fragments": [
-                {
-                    "id": 30,
-                    "words": "le erat",
-                    "refs": [
-                        {
-                            "id": 30,
-                            "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
-        },
-        {
+          "id": 32,
+          "words": "erat vel:",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
             "id": 17,
             "block": "avec le",
-            "fragments": [
-                {
-                    "id": 31,
-                    "words": "erat vel:",
-                    "refs": [
-                        {
-                            "id": 31,
-                            "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
+            "markov": {
+              "id": "1"
+            }
+          }
         },
         {
-            "id": 18,
-            "block": "le erat",
-            "fragments": [
-                {
-                    "id": 32,
-                    "words": "vel: il",
-                    "refs": [
-                        {
-                            "id": 32,
-                            "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "id": 19,
-            "block": "erat vel:",
-            "fragments": [
-                {
-                    "id": 33,
-                    "words": "il n'en",
-                    "refs": [
-                        {
-                            "id": 33,
-                            "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "id": 20,
-            "block": "vel: il",
-            "fragments": [
-                {
-                    "id": 34,
-                    "words": "n'en est",
-                    "refs": [
-                        {
-                            "id": 34,
-                            "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
-        },
-        {
+          "id": 36,
+          "words": "est rien…",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
             "id": 21,
             "block": "il n'en",
-            "fragments": [
-                {
-                    "id": 35,
-                    "words": "est rien…",
-                    "refs": [
-                        {
-                            "id": 35,
-                            "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
+            "markov": {
+              "id": "1"
+            }
+          }
         },
         {
-            "id": 22,
-            "block": "Fusce tincidunt",
-            "fragments": [
-                {
-                    "id": 37,
-                    "words": "tempor, erat",
-                    "refs": [
-                        {
-                            "id": 37,
-                            "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
+          "id": 25,
+          "words": "est rien…",
+          "startWordMarkov": null,
+          "endWordMarkov": {
+            "id": "1"
+          },
+          "corpusEntry": null
         },
         {
+          "id": 24,
+          "words": "fringilla dui",
+          "startWordMarkov": {
+            "id": "1"
+          },
+          "endWordMarkov": null,
+          "corpusEntry": null
+        },
+        {
+          "id": 34,
+          "words": "il n'en",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
+            "id": 19,
+            "block": "erat vel:",
+            "markov": {
+              "id": "1"
+            }
+          }
+        },
+        {
+          "id": 31,
+          "words": "le erat",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
+            "id": 16,
+            "block": "rupture avec",
+            "markov": {
+              "id": "1"
+            }
+          }
+        },
+        {
+          "id": 35,
+          "words": "n'en est",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
+            "id": 20,
+            "block": "vel: il",
+            "markov": {
+              "id": "1"
+            }
+          }
+        },
+        {
+          "id": 29,
+          "words": "rupture avec",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
+            "id": 14,
+            "block": "annoncé une",
+            "markov": {
+              "id": "1"
+            }
+          }
+        },
+        {
+          "id": 28,
+          "words": "une rupture",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
+            "id": 13,
+            "block": "avait annoncé",
+            "markov": {
+              "id": "1"
+            }
+          }
+        },
+        {
+          "id": 33,
+          "words": "vel: il",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
+            "id": 18,
+            "block": "le erat",
+            "markov": {
+              "id": "1"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet",
+      "tags": null,
+      "custom": null,
+      "fragments": [
+        {
+          "id": 37,
+          "words": "Fusce tincidunt",
+          "startWordMarkov": {
+            "id": "1"
+          },
+          "endWordMarkov": null,
+          "corpusEntry": null
+        },
+        {
+          "id": 40,
+          "words": "erat vel",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
             "id": 23,
             "block": "tincidunt tempor,",
-            "fragments": [
-                {
-                    "id": 38,
-                    "words": "erat vel",
-                    "refs": [
-                        {
-                            "id": 38,
-                            "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
+            "markov": {
+              "id": "1"
+            }
+          }
         },
         {
-            "id": 24,
-            "block": "vel lacinia",
-            "fragments": [
-                {
-                    "id": 40,
-                    "words": "vel ex",
-                    "refs": [
-                        {
-                            "id": 41,
-                            "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
-        },
-        {
+          "id": 44,
+          "words": "ex pharetra",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
             "id": 25,
             "block": "lacinia vel",
-            "fragments": [
-                {
-                    "id": 41,
-                    "words": "ex pharetra",
-                    "refs": [
-                        {
-                            "id": 42,
-                            "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
+            "markov": {
+              "id": "1"
+            }
+          }
         },
         {
-            "id": 26,
-            "block": "vel ex",
-            "fragments": [
-                {
-                    "id": 42,
-                    "words": "pharetra pretium",
-                    "refs": [
-                        {
-                            "id": 43,
-                            "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "id": 27,
-            "block": "ex pharetra",
-            "fragments": [
-                {
-                    "id": 43,
-                    "words": "pretium lacinia",
-                    "refs": [
-                        {
-                            "id": 44,
-                            "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
-        },
-        {
+          "id": 47,
+          "words": "lacinia imperdiet",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
             "id": 28,
             "block": "pharetra pretium",
-            "fragments": [
-                {
-                    "id": 44,
-                    "words": "lacinia imperdiet",
-                    "refs": [
-                        {
-                            "id": 45,
-                            "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet",
-                            "custom": null
-                        }
-                    ]
-                }
-            ]
-        }
-    ],
-    "startWords": [
-        {
-            "id": 8,
-            "words": "Consectetur adipiscing",
-            "refs": [
-                {
-                    "id": 8,
-                    "string": "Consectetur adipiscing elit",
-                    "custom": null
-                }
-            ]
+            "markov": {
+              "id": "1"
+            }
+          }
         },
         {
-            "id": 18,
-            "words": "Egestas bibendum",
-            "refs": [
-                {
-                    "id": 18,
-                    "string": "Egestas bibendum eros nisi ut lacus",
-                    "custom": null
-                }
-            ]
+          "id": 38,
+          "words": "lacinia imperdiet",
+          "startWordMarkov": null,
+          "endWordMarkov": {
+            "id": "1"
+          },
+          "corpusEntry": null
         },
         {
-            "id": 36,
-            "words": "Fusce tincidunt",
-            "refs": [
-                {
-                    "id": 36,
-                    "string": "Fusce tincidunt tempor, erat vel lacinia vel ex pharetra pretium lacinia imperdiet",
-                    "custom": null
-                }
-            ]
+          "id": 42,
+          "words": "lacinia vel",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
+            "id": 6,
+            "block": "erat vel",
+            "markov": {
+              "id": "1"
+            }
+          }
         },
         {
-            "id": 15,
-            "words": "Justo nisi",
-            "refs": [
-                {
-                    "id": 15,
-                    "string": "Justo nisi fringilla dui",
-                    "custom": null
-                }
-            ]
+          "id": 45,
+          "words": "pharetra pretium",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
+            "id": 26,
+            "block": "vel ex",
+            "markov": {
+              "id": "1"
+            }
+          }
         },
         {
-            "id": 1,
-            "words": "Lorem ipsum",
-            "refs": [
-                {
-                    "id": 1,
-                    "string": "Lorem ipsum dolor sit amet",
-                    "custom": null
-                }
-            ]
+          "id": 46,
+          "words": "pretium lacinia",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
+            "id": 27,
+            "block": "ex pharetra",
+            "markov": {
+              "id": "1"
+            }
+          }
         },
         {
-            "id": 10,
-            "words": "Quisque tempor,",
-            "refs": [
-                {
-                    "id": 10,
-                    "string": "Quisque tempor, erat vel lacinia imperdiet",
-                    "custom": null
-                }
-            ]
+          "id": 39,
+          "words": "tempor, erat",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
+            "id": 22,
+            "block": "Fusce tincidunt",
+            "markov": {
+              "id": "1"
+            }
+          }
         },
         {
-            "id": 23,
-            "words": "fringilla dui",
-            "refs": [
-                {
-                    "id": 23,
-                    "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
-                    "custom": null
-                }
-            ]
-        }
-    ],
-    "endWords": [
-        {
-            "id": 9,
-            "words": "adipiscing elit",
-            "refs": [
-                {
-                    "id": 9,
-                    "string": "Consectetur adipiscing elit",
-                    "custom": null
-                }
-            ]
-        },
-        {
+          "id": 43,
+          "words": "vel ex",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
             "id": 24,
-            "words": "est rien…",
-            "refs": [
-                {
-                    "id": 24,
-                    "string": "fringilla dui avait annoncé une rupture avec le erat vel: il n'en est rien…",
-                    "custom": null
-                }
-            ]
+            "block": "vel lacinia",
+            "markov": {
+              "id": "1"
+            }
+          }
         },
         {
-            "id": 16,
-            "words": "fringilla dui",
-            "refs": [
-                {
-                    "id": 16,
-                    "string": "Justo nisi fringilla dui",
-                    "custom": null
-                }
-            ]
-        },
-        {
-            "id": 11,
-            "words": "lacinia imperdiet",
-            "refs": [
-                {
-                    "id": 11,
-                    "string": "Quisque tempor, erat vel lacinia imperdiet",
-                    "custom": null
-                }
-            ]
-        },
-        {
-            "id": 2,
-            "words": "sit amet",
-            "refs": [
-                {
-                    "id": 2,
-                    "string": "Lorem ipsum dolor sit amet",
-                    "custom": null
-                }
-            ]
-        },
-        {
+          "id": 41,
+          "words": "vel lacinia",
+          "startWordMarkov": null,
+          "endWordMarkov": null,
+          "corpusEntry": {
             "id": 5,
-            "words": "start words",
-            "refs": [
-                {
-                    "id": 5,
-                    "string": "Lorem ipsum duplicate start words",
-                    "custom": null
-                }
-            ]
-        },
-        {
-            "id": 19,
-            "words": "ut lacus",
-            "refs": [
-                {
-                    "id": 19,
-                    "string": "Egestas bibendum eros nisi ut lacus",
-                    "custom": null
-                }
-            ]
+            "block": "tempor, erat",
+            "markov": {
+              "id": "1"
+            }
+          }
         }
-    ],
-    "options": {
-        "id": "1",
-        "stateSize": 2
+      ]
     }
+  ],
+  "options": {
+    "id": "1",
+    "stateSize": 2
+  }
 }

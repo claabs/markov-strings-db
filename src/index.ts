@@ -1,13 +1,12 @@
 /* eslint-disable no-await-in-loop */
-import { Connection, ConnectionOptions, EntitySchema, getConnectionOptions, In } from 'typeorm';
+import { Connection, ConnectionOptions, EntitySchema, getConnectionOptions, Like } from 'typeorm';
 import { MarkovCorpusEntry } from './entity/MarkovCorpusEntry';
 import { MarkovFragment } from './entity/MarkovFragment';
 import { MarkovInputData } from './entity/MarkovInputData';
 import { MarkovOptions } from './entity/MarkovOptions';
 import { MarkovRoot } from './entity/MarkovRoot';
-import { CreateTables1640838335688 } from './migration/1640838335688-CreateTables';
-import { InputDataIndices1640929645188 } from './migration/1640929645188-InputDataIndices';
-import { Importer } from './importer';
+import { CreateTables1641083518573 } from './migration/1641083518573-CreateTables';
+import { getV3ImportInputData } from './importer';
 import { MarkovImportExport as MarkovV3ImportExport } from './v3-types';
 
 const ALL_ENTITIES = [
@@ -17,7 +16,7 @@ const ALL_ENTITIES = [
   MarkovInputData,
   MarkovFragment,
 ];
-const ALL_MIGRATIONS = [CreateTables1640838335688, InputDataIndices1640929645188];
+const ALL_MIGRATIONS = [CreateTables1641083518573];
 
 /**
  * Data to build the Markov instance
@@ -69,7 +68,8 @@ export interface AddDataProps {
   custom?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   /**
-   * A list of strings that will be stored alongside the string to be used for later retreival/deletion
+   * A list of strings that will be stored alongside the string to be used for later retreival/deletion.
+   * Note you MUST NOT have any comma in values of a tag.
    */
   tags?: string[];
 }
@@ -210,7 +210,8 @@ export default class Markov {
     } else {
       queryCondition = { corpusEntry: condition };
     }
-    const fragment = await MarkovFragment.createQueryBuilder()
+    const fragment = await MarkovFragment.createQueryBuilder('fragment')
+      .leftJoinAndSelect('fragment.ref', 'ref')
       .where(queryCondition)
       .orderBy('RANDOM()')
       .limit(1)
@@ -230,17 +231,17 @@ export default class Markov {
       const options = MarkovOptions.create(data.options);
       this.db.options = options;
       await MarkovOptions.save(options);
-
-      const importer = new Importer(this.db);
-      const startWords = await importer.saveImportFragments(data.startWords, 'startWordMarkov');
-      const endWords = await importer.saveImportFragments(data.endWords, 'endWordMarkov');
-      const corpus = await importer.saveImportCorpus(data.corpus);
-      this.db.id = this.id;
-      this.db.options = options;
-      this.db.startWords = startWords;
-      this.db.endWords = endWords;
-      this.db.corpus = corpus;
       await MarkovRoot.save(this.db);
+
+      // Populate the inputData first so the relations work
+      await MarkovInputData.save(data.inputData);
+      // Gather and save all the fragments and corpus entries (cascaded)
+      const allFragments: MarkovFragment[] = [];
+      // Would rather just use flatmap here, but it's not available in Node 10
+      data.inputData.forEach((inputDatum) => allFragments.push(...inputDatum.fragments));
+      await MarkovFragment.save(allFragments);
+
+      this.db = await MarkovRoot.findOneOrFail(this.id); // Repopulate the top level MarkovRoot fields
     } else {
       // Legacy import
       const options = MarkovOptions.create(data.options);
@@ -248,18 +249,10 @@ export default class Markov {
       this.db = new MarkovRoot();
       this.db.id = this.id;
       this.db.options = options;
-
-      const importer = new Importer(this.db);
-      const startWords = await importer.saveImportV3Fragments(data.startWords, 'startWordMarkov');
-      const endWords = await importer.saveImportV3Fragments(data.endWords, 'endWordMarkov');
-      const corpus = await importer.saveImportV3Corpus(data.corpus);
-
-      this.db.id = this.id;
-      this.db.options = options;
-      this.db.startWords = startWords;
-      this.db.endWords = endWords;
-      this.db.corpus = corpus;
       await MarkovRoot.save(this.db);
+
+      const inputData = getV3ImportInputData(data);
+      await this.buildCorpus(inputData);
     }
     this.id = this.db.id;
     this.options = this.db.options;
@@ -273,13 +266,12 @@ export default class Markov {
     const db = await MarkovRoot.findOneOrFail({
       where: { id: this.id },
       relations: [
-        'corpus',
-        'corpus.fragments',
-        'corpus.fragments.refs',
-        'startWords',
-        'startWords.refs',
-        'endWords',
-        'endWords.refs',
+        'inputData',
+        'inputData.fragments',
+        'inputData.fragments.startWordMarkov',
+        'inputData.fragments.endWordMarkov',
+        'inputData.fragments.corpusEntry',
+        'inputData.fragments.corpusEntry.markov',
         'options',
       ],
       loadEagerRelations: true,
@@ -321,81 +313,47 @@ export default class Markov {
     // eslint-disable-next-line no-restricted-syntax
     for (const item of data) {
       // Arrays to store future DB writes so we can write them all in one transaction
-      const entriesToSave: MarkovCorpusEntry[] = [];
       const fragmentsToSave: MarkovFragment[] = [];
-      const inputDataToSave: MarkovInputData[] = [];
 
       const line = item.string;
       const words = line.split(' ');
       const { stateSize } = options; // Default value of 2 is set in the constructor
 
+      const inputData = await MarkovInputData.create({
+        string: item.string,
+        custom: item.custom,
+        tags: item.tags,
+        markov: this.db,
+      }).save();
+
       // #region Start words
       // "Start words" is the list of words that can start a generated chain.
-
       const start = words.slice(0, stateSize).join(' ');
-      const oldStartObj = await MarkovFragment.findOne({ startWordMarkov: this.db, words: start });
-
-      // If we already have identical startWords
-      if (oldStartObj) {
-        let inputData = await MarkovInputData.findOne({ fragment: oldStartObj });
-        // If the current item is not present in the references, add it
-        if (!inputData) {
-          inputData = new MarkovInputData();
-          inputData.fragment = oldStartObj;
-          inputData.string = item.string;
-          inputData.custom = item.custom;
-          inputData.tags = item.tags;
-          inputDataToSave.push(inputData);
-        }
-      } else {
-        // Add the startWords (and reference) to the list
-        const fragment = new MarkovFragment();
-        fragment.words = start;
-        fragment.startWordMarkov = this.db;
-        fragmentsToSave.push(fragment);
-        const ref = new MarkovInputData();
-        ref.fragment = fragment;
-        ref.string = item.string;
-        ref.custom = item.custom;
-        ref.tags = item.tags;
-        inputDataToSave.push(ref);
-      }
-
+      // Add the startWords (and reference) to the list
+      // Duplicate fragments with the same words are allowed
+      fragmentsToSave.push(
+        MarkovFragment.create({
+          words: start,
+          startWordMarkov: this.db,
+          ref: inputData,
+        })
+      );
       // #endregion Start words
 
       // #region End words
       // "End words" is the list of words that can end a generated chain.
-
       const end = words.slice(words.length - stateSize, words.length).join(' ');
-      const oldEndObj = await MarkovFragment.findOne({ endWordMarkov: this.db, words: end });
-      if (oldEndObj) {
-        let inputData = await MarkovInputData.findOne({ fragment: oldEndObj });
-        // If the current item is not present in the references, add it
-        if (!inputData) {
-          inputData = new MarkovInputData();
-          inputData.fragment = oldEndObj;
-          inputData.string = item.string;
-          inputData.custom = item.custom;
-          inputData.tags = item.tags;
-          inputDataToSave.push(inputData);
-        }
-      } else {
-        const fragment = new MarkovFragment();
-        fragment.words = end;
-        fragment.endWordMarkov = this.db;
-        fragmentsToSave.push(fragment);
-        const ref = new MarkovInputData();
-        ref.fragment = fragment;
-        ref.string = item.string;
-        ref.custom = item.custom;
-        ref.tags = item.tags;
-        inputDataToSave.push(ref);
-      }
-
+      // Duplicate fragments with the same words are allowed
+      fragmentsToSave.push(
+        MarkovFragment.create({
+          words: end,
+          endWordMarkov: this.db,
+          ref: inputData,
+        })
+      );
       // #endregion End words
 
       // #region Corpus generation
-
       // We loop through all words in the sentence to build "blocks" of `stateSize`
       // e.g. for a stateSize of 2, "lorem ipsum dolor sit amet" will have the following blocks:
       //    "lorem ipsum", "ipsum dolor", "dolor sit", and "sit amet"
@@ -408,54 +366,26 @@ export default class Markov {
         }
 
         // Check if the corpus already has a corresponding "curr" block
-        const block = await MarkovCorpusEntry.findOne({ markov: this.db, block: curr });
-        if (block) {
-          const oldObj = await MarkovFragment.findOne({ corpusEntry: block, words: next });
-          if (oldObj) {
-            // If the corpus already has the chain "curr -> next",
-            // just add the current reference for this block
-            const ref = new MarkovInputData();
-            ref.fragment = oldObj;
-            ref.string = item.string;
-            ref.custom = item.custom;
-            ref.tags = item.tags;
-            inputDataToSave.push(ref);
-          } else {
-            // Add the new "next" block in the list of possible paths for "curr"
-            const fragment = new MarkovFragment();
-            fragment.words = next;
-            fragment.corpusEntry = block;
-            fragmentsToSave.push(fragment);
-            const ref = new MarkovInputData();
-            ref.fragment = fragment;
-            ref.string = item.string;
-            ref.custom = item.custom;
-            ref.tags = item.tags;
-            inputDataToSave.push(ref);
-          }
-        } else {
-          // Add the "curr" block and link it with the "next" one
-          const entry = new MarkovCorpusEntry();
-          entry.block = curr;
-          entry.markov = this.db;
-          entriesToSave.push(entry);
-          const fragment = new MarkovFragment();
-          fragment.words = next;
-          fragment.corpusEntry = entry;
-          fragmentsToSave.push(fragment);
-          const ref = new MarkovInputData();
-          ref.fragment = fragment;
-          ref.string = item.string;
-          ref.custom = item.custom;
-          ref.tags = item.tags;
-          inputDataToSave.push(ref);
+        let entry = await MarkovCorpusEntry.findOne({ markov: this.db, block: curr });
+        if (!entry) {
+          entry = MarkovCorpusEntry.create({
+            block: curr,
+            markov: this.db,
+          });
         }
+        fragmentsToSave.push(
+          // Add the "curr" block and link it with the "next" one
+          MarkovFragment.create({
+            words: next,
+            corpusEntry: entry,
+            ref: inputData,
+          })
+        );
       }
 
-      // Save the fragments and input data as they will be needed in the DB for corpus generation
-      await MarkovCorpusEntry.save(entriesToSave);
+      // Save the fragments as they will be needed in the DB for corpus generation
+      // Corpus entries are inserted via cascade
       await MarkovFragment.save(fragmentsToSave);
-      await MarkovInputData.save(inputDataToSave);
     }
   }
 
@@ -464,26 +394,34 @@ export default class Markov {
    * Not really performant enough to handle a massive list of deletions.
    * @param rawData A list of full strings
    */
-  public async removeData(rawData: string[]): Promise<void> {
+  public async removeStrings(rawData: string[]): Promise<void> {
     await this.ensureSetup();
     const inputData = await MarkovInputData.find({
-      relations: ['fragment', 'fragment.corpusEntry'],
-      where: [
-        {
-          string: rawData,
-          fragment: { startWordMarkov: this.db },
-        },
-        {
-          string: rawData,
-          fragment: { endWordMarkov: this.db },
-        },
-        {
-          string: rawData,
-          fragment: { corpusEntry: { markov: this.db } },
-        },
-      ],
+      where: {
+        string: rawData,
+        markov: this.db,
+      },
     });
     await MarkovInputData.remove(inputData);
+    await Markov.pruneDanglingCorpusEntries();
+  }
+
+  /**
+   * Remove all data with a specific tag associated with it references from the database.
+   * Should be performant enough to handle large batches.
+   * @param tags A list of tags
+   */
+  public async removeTags(tags: string[]): Promise<void> {
+    await this.ensureSetup();
+    let query = MarkovInputData.createQueryBuilder().delete().from(MarkovInputData);
+    tags.forEach((tag) => {
+      query = query.orWhere({ tags: Like(tag) });
+      query = query.orWhere({ tags: Like(`%,${tag},%`) });
+      query = query.orWhere({ tags: Like(`${tag},%`) });
+      query = query.orWhere({ tags: Like(`%,${tag}`) });
+    });
+    await query.execute();
+    await Markov.pruneDanglingCorpusEntries();
   }
 
   /**
@@ -563,9 +501,7 @@ export default class Markov {
         .join(' ')
         .trim();
 
-      const refs = await MarkovInputData.find<MarkovInputData<CustomData>>({
-        fragment: { id: In(arr.map((f) => f.id)) },
-      });
+      const refs = arr.map((elem) => elem.ref);
 
       const result = {
         string: sentence,
@@ -587,5 +523,19 @@ export default class Markov {
         tries - 1
       } tries. Possible solutions: try a less restrictive filter(), give more raw data to the corpus builder, or increase the number of maximum tries.`
     );
+  }
+
+  /**
+   * Remove any dangling corpus entries with 0 fragments pointing to them
+   */
+  private static async pruneDanglingCorpusEntries(): Promise<void> {
+    const subQuery = MarkovFragment.createQueryBuilder('fragment').where(
+      'fragment.corpusEntry = corpusEntry.id'
+    );
+    const emptyCorpuses = await MarkovCorpusEntry.createQueryBuilder('corpusEntry')
+      .where(`NOT EXISTS (${subQuery.getQuery()})`)
+      .setParameters(subQuery.getParameters())
+      .getMany();
+    await MarkovCorpusEntry.remove(emptyCorpuses);
   }
 }
