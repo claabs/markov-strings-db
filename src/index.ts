@@ -530,12 +530,9 @@ export default class Markov {
    * Remove any dangling corpus entries with 0 fragments pointing to them
    */
   private static async pruneDanglingCorpusEntries(): Promise<void> {
-    const subQuery = MarkovFragment.createQueryBuilder('fragment').where(
-      'fragment.corpusEntry = corpusEntry.id'
-    );
     const emptyCorpuses = await MarkovCorpusEntry.createQueryBuilder('corpusEntry')
-      .where(`NOT EXISTS (${subQuery.getQuery()})`)
-      .setParameters(subQuery.getParameters())
+      .leftJoin('corpusEntry.fragments', 'fragment')
+      .where('fragment.corpusEntry IS NULL')
       .getMany();
     await MarkovCorpusEntry.remove(emptyCorpuses);
   }

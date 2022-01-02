@@ -1,6 +1,6 @@
 {
   "name": "markov-strings-db",
-  "version": "4.1.1",
+  "version": "4.1.2",
   "description": "A Markov string generator that utilizes a relational SQL database",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
