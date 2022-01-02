@@ -408,7 +408,7 @@ export default class Markov {
 
   /**
    * Remove all data with a specific tag associated with it references from the database.
-   * Should be performant enough to handle large batches.
+   * Not really performant enough to handle a massive list of deletions.
    * @param tags A list of tags
    */
   public async removeTags(tags: string[]): Promise<void> {
@@ -433,6 +433,7 @@ export default class Markov {
     if (this.options instanceof MarkovOptions) await MarkovOptions.delete(this.options);
     await MarkovRoot.delete(this.db);
     this.construct();
+    this.db = undefined as unknown as MarkovRoot; // Required to ensure setup() runs again later to populate the DB
   }
 
   /**

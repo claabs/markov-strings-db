@@ -415,6 +415,17 @@ describe('Markov class', () => {
         expect(afterRootCount).toEqual(0);
       });
 
+      it(`should still work after being deleted`, async () => {
+        await markov.delete();
+
+        await markov.addData(data);
+
+        const count = await MarkovFragment.count({
+          startWordMarkov: markov.db,
+        });
+        expect(count).toEqual(8); // This is a change from v3's 7 as this version keeps duplicates
+      });
+
       it(`should erase a phrase from the database`, async () => {
         const deletePhrase = data[3];
 
