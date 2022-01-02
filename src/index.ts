@@ -109,6 +109,13 @@ export type MarkovGenerateOptions<CustomData = any> = {
    * A callback to filter results (see example in the Readme)
    */
   filter?: (result: MarkovResult<CustomData>) => boolean;
+
+  /**
+   * Attempt to generate a message with this as the start.
+   * It should be a sentence fragment with the number of words equal to the stateSize.
+   * Any extra words over the stateSize will be trimmed away.
+   */
+  startSeed?: string;
 };
 
 export type Corpus = Record<string, MarkovFragment[]>;
@@ -204,12 +211,20 @@ export default class Markov {
   /**
    * Gets a random fragment for a startWord or corpusEntry from the database.
    */
-  private async sampleFragment(condition?: MarkovCorpusEntry): Promise<MarkovFragment | undefined> {
+  private async sampleFragment(condition?: MarkovCorpusEntry): Promise<MarkovFragment | undefined>;
+
+  private async sampleFragment(startSeed?: string): Promise<MarkovFragment | undefined>;
+
+  private async sampleFragment(
+    startSeedOrCondition?: string | MarkovCorpusEntry
+  ): Promise<MarkovFragment | undefined> {
     let queryCondition;
-    if (!condition) {
-      queryCondition = { startWordMarkov: this.db };
+    if (typeof startSeedOrCondition === 'string') {
+      queryCondition = { startWordMarkov: this.db, words: startSeedOrCondition };
+    } else if (startSeedOrCondition) {
+      queryCondition = { corpusEntry: startSeedOrCondition };
     } else {
-      queryCondition = { corpusEntry: condition };
+      queryCondition = { startWordMarkov: this.db };
     }
     const fragment = await MarkovFragment.createQueryBuilder('fragment')
       .leftJoinAndSelect('fragment.ref', 'ref')
@@ -451,6 +466,12 @@ export default class Markov {
       );
     }
 
+    let startSeed: string | undefined;
+    const splitStartSeed = options?.startSeed?.split(' ');
+    if (splitStartSeed && splitStartSeed.length >= this.options.stateSize) {
+      startSeed = splitStartSeed.slice(0, this.options.stateSize).join(' ');
+    }
+
     const maxTries = options?.maxTries ? options.maxTries : 10;
 
     let tries: number;
@@ -461,7 +482,8 @@ export default class Markov {
 
       // Create an array of MarkovCorpusItems
       // The first item is a random startWords element
-      const firstSample = await this.sampleFragment();
+      let firstSample = await this.sampleFragment(startSeed);
+      if (!firstSample && startSeed) firstSample = await this.sampleFragment(); // If start seed fails, try without it
       if (!firstSample)
         throw new Error(
           'Could not get a random fragment. There is either no data, or the data is not sufficient to create markov chains.'

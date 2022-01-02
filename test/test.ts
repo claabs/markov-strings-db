@@ -399,6 +399,38 @@ describe('Markov class', () => {
         await markov.generate(options);
       });
 
+      it('should generate a phrase with a startSeed', async () => {
+        const options = {
+          startSeed: 'Egestas bibendum',
+        };
+        const result = await markov.generate(options);
+        expect(result.string.startsWith('Egestas bibendum')).toBeTruthy();
+      });
+
+      it('should trim a startSeed', async () => {
+        const options = {
+          startSeed: 'Egestas bibendum extra words',
+        };
+        const result = await markov.generate(options);
+        expect(result.string.startsWith('Egestas bibendum')).toBeTruthy();
+      });
+
+      it('should continue with a short startSeed', async () => {
+        const options = {
+          startSeed: 'whoops',
+        };
+        const result = await markov.generate(options);
+        expect(result.string).toBeDefined();
+      });
+
+      it('should continue with a bad startSeed', async () => {
+        const options = {
+          startSeed: 'whoops word',
+        };
+        const result = await markov.generate(options);
+        expect(result.string).toBeDefined();
+      });
+
       it(`should delete the entire database`, async () => {
         await markov.delete();
 
