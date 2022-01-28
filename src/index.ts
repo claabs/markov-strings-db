@@ -545,6 +545,10 @@ export default class Markov {
 
       return result;
     }
+    if (startSeed) {
+      // Retry the whole process witout a startSeed if it fails
+      return this.generate({ ...options, startSeed: undefined });
+    }
     throw new Error(
       `Failed to build a sentence after ${
         tries - 1

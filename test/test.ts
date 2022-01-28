@@ -431,6 +431,17 @@ describe('Markov class', () => {
         expect(result.string).toBeDefined();
       });
 
+      it('should retry without startSeed if it cannot generate', async () => {
+        const obscureStartSeed = 'obscure words';
+        markov.addData([obscureStartSeed]);
+        const options = {
+          startSeed: obscureStartSeed,
+        };
+        const result = await markov.generate(options);
+        expect(result.string).toBeDefined();
+        expect(result.string.startsWith(obscureStartSeed)).toBeFalsy();
+      });
+
       it(`should delete the entire database`, async () => {
         await markov.delete();
 
