@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
-import { Connection, ConnectionOptions, EntitySchema, getConnectionOptions, Like } from 'typeorm';
+import { DataSource, DataSourceOptions, EntitySchema, Like, MixedList } from 'typeorm';
+import { ObjectUtils } from 'typeorm/util/ObjectUtils';
 import { MarkovCorpusEntry } from './entity/MarkovCorpusEntry';
 import { MarkovFragment } from './entity/MarkovFragment';
 import { MarkovInputData } from './entity/MarkovInputData';
@@ -10,14 +11,14 @@ import { AddRelationIndices1641146075940 } from './migration/1641146075940-AddRe
 import { getV3ImportInputData } from './importer';
 import { MarkovImportExport as MarkovV3ImportExport } from './v3-types';
 
-const ALL_ENTITIES = [
+export const ALL_ENTITIES = [
   MarkovCorpusEntry,
   MarkovRoot,
   MarkovOptions,
   MarkovInputData,
   MarkovFragment,
 ];
-const ALL_MIGRATIONS = [CreateTables1641083518573, AddRelationIndices1641146075940];
+export const ALL_MIGRATIONS = [CreateTables1641083518573, AddRelationIndices1641146075940];
 
 /**
  * Data to build the Markov instance
@@ -134,28 +135,23 @@ export default class Markov {
   private constructorProps?: MarkovConstructorProps;
 
   /**
-   * If you're connecting the Markov DB with your parent project's DB, you'll need to extend it to add the Markov entities to the connection.
-   * @param connectionOptions Your TypeORM connection options. If not provided, it will load the ormconfig from a file.
-   * @returns ConnectionOptions that should be passed into a createConnection() call.
+   * If you're connecting the Markov DB with your parent project's DB, you'll need to extend it to add the Markov entities to the data source.
+   * @param dataSourceOptions Your TypeORM data source options.
+   * @returns DataSourceOptions that should be passed into a new DataSource(...) call.
    */
-  public static async extendConnectionOptions(
-    connectionOptions?: ConnectionOptions
-  ): Promise<ConnectionOptions> {
-    let baseConnectionOpts: ConnectionOptions;
-    if (connectionOptions) {
-      baseConnectionOpts = connectionOptions;
-    } else {
-      baseConnectionOpts = await getConnectionOptions();
-    }
-
+  public static extendDataSourceOptions(dataSourceOptions: DataSourceOptions): DataSourceOptions {
     // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any
-    const appendedEntities: (Function | string | EntitySchema<any>)[] = ALL_ENTITIES;
-    if (baseConnectionOpts.entities) appendedEntities.push(...baseConnectionOpts.entities);
+    const appendedEntities: MixedList<string | Function | EntitySchema<any>> = ALL_ENTITIES;
+    if (dataSourceOptions.entities)
+      appendedEntities.push(...ObjectUtils.mixedListToArray(dataSourceOptions.entities));
+
     // eslint-disable-next-line @typescript-eslint/ban-types
     const appendedMigrations: (Function | string)[] = ALL_MIGRATIONS;
-    if (baseConnectionOpts.migrations) appendedMigrations.push(...baseConnectionOpts.migrations);
+    if (dataSourceOptions.migrations)
+      appendedMigrations.push(...ObjectUtils.mixedListToArray(dataSourceOptions.migrations));
+
     return {
-      ...baseConnectionOpts,
+      ...dataSourceOptions,
       entities: appendedEntities,
       migrations: appendedMigrations,
     };
@@ -177,14 +173,14 @@ export default class Markov {
   }
 
   /**
-   * If you have a non-default connection (you probably don't), pass it in here.
+   * If you have a non-default data source (you probably don't), pass it in here.
    * Otherwise, setup() is called implicitly on any async function.
-   * @param connection A non-default connection to be used by Markov's entities
+   * @param dataSource A non-default data source to be used by Markov's entities
    */
-  public async setup(connection?: Connection): Promise<void> {
-    if (connection) ALL_ENTITIES.forEach((e) => e.useConnection(connection));
+  public async setup(dataSource?: DataSource): Promise<void> {
+    if (dataSource) ALL_ENTITIES.forEach((e) => e.useDataSource(dataSource));
 
-    let db = await MarkovRoot.findOne({
+    let db = await MarkovRoot.findOneBy({
       id: this.id,
     });
     let options: MarkovOptions;
@@ -197,7 +193,7 @@ export default class Markov {
       db.options = options;
       await MarkovRoot.save(db);
     } else {
-      options = await MarkovOptions.findOneOrFail(db.options);
+      options = await MarkovOptions.findOneByOrFail({ id: db.options?.id });
     }
     this.db = db;
     this.id = this.db.id;
@@ -211,13 +207,13 @@ export default class Markov {
   /**
    * Gets a random fragment for a startWord or corpusEntry from the database.
    */
-  private async sampleFragment(condition?: MarkovCorpusEntry): Promise<MarkovFragment | undefined>;
+  private async sampleFragment(condition?: MarkovCorpusEntry): Promise<MarkovFragment | null>;
 
-  private async sampleFragment(startSeed?: string): Promise<MarkovFragment | undefined>;
+  private async sampleFragment(startSeed?: string): Promise<MarkovFragment | null>;
 
   private async sampleFragment(
     startSeedOrCondition?: string | MarkovCorpusEntry
-  ): Promise<MarkovFragment | undefined> {
+  ): Promise<MarkovFragment | null> {
     let queryCondition;
     if (typeof startSeedOrCondition === 'string') {
       queryCondition = { startWordMarkov: this.db, words: startSeedOrCondition };
@@ -257,7 +253,7 @@ export default class Markov {
       data.inputData.forEach((inputDatum) => allFragments.push(...inputDatum.fragments));
       await MarkovFragment.save(allFragments);
 
-      this.db = await MarkovRoot.findOneOrFail(this.id); // Repopulate the top level MarkovRoot fields
+      this.db = await MarkovRoot.findOneByOrFail({ id: this.id }); // Repopulate the top level MarkovRoot fields
     } else {
       // Legacy import
       const options = MarkovOptions.create(data.options);
@@ -383,7 +379,7 @@ export default class Markov {
         }
 
         // Check if the corpus already has a corresponding "curr" block
-        let entry = await MarkovCorpusEntry.findOne({ markov: this.db, block: curr });
+        let entry = await MarkovCorpusEntry.findOneBy({ markov: { id: this.db.id }, block: curr });
         if (!entry) {
           entry = MarkovCorpusEntry.create({
             block: curr,
@@ -446,8 +442,8 @@ export default class Markov {
   public async delete(): Promise<void> {
     await this.ensureSetup();
 
-    if (this.options instanceof MarkovOptions) await MarkovOptions.delete(this.options);
-    await MarkovRoot.delete(this.db);
+    if (this.options instanceof MarkovOptions) await MarkovOptions.delete({ id: this.options.id });
+    await MarkovRoot.delete({ id: this.db.id });
     this.construct();
     this.db = undefined as unknown as MarkovRoot; // Required to ensure setup() runs again later to populate the DB
   }
@@ -459,7 +455,7 @@ export default class Markov {
     options?: MarkovGenerateOptions<CustomData>
   ): Promise<MarkovResult<CustomData>> {
     await this.ensureSetup();
-    const corpusSize = await MarkovCorpusEntry.count({ markov: this.db });
+    const corpusSize = await MarkovCorpusEntry.countBy({ markov: { id: this.db.id } });
     if (corpusSize <= 0) {
       throw new Error(
         'Corpus is empty. There is either no data, or the data is not sufficient to create markov chains.'
@@ -510,8 +506,8 @@ export default class Markov {
         score += state.words.length - 1; // increment score
 
         // is sentence finished?
-        const endWords = await MarkovFragment.findOne({
-          endWordMarkov: this.db,
+        const endWords = await MarkovFragment.findOneBy({
+          endWordMarkov: { id: this.db.id },
           words: state.words,
         });
         if (endWords) {

@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.2.0
+
+### Breaking Changes
+
+typeorm was upgraded to 0.3. See [its changelog](https://github.com/typeorm/typeorm/releases/tag/0.3.0) for its full list of breaking changes.
+
+- Minimum Node version increased from 10 to 14
+- `extendConnectionOptions` renamed to `extendDataSourceOptions`
+- `extendDataSourceOptions` now requires a parameter, as `ormconfig` is now deprecated
+
 ## 3.0.0 - BREAKING CHANGES
 
 - Refactoring to facilitate iterative construction of the corpus (multiple `.addData()` instead of a one-time `buildCorpus()`), and export/import of corpus internal data.
