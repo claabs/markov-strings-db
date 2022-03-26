@@ -11,14 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [ '10', '12', '14', '16' ]
+        node: ["14", "16"]
     name: Node ${{ matrix.node }} sample
     steps:
       - uses: actions/checkout@v2
       - name: Setup node
         uses: actions/setup-node@v2
         with:
-          cache: 'npm'
+          cache: "npm"
           node-version: ${{ matrix.node }}
       - run: npm ci
       - run: npm test
@@ -34,7 +34,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v2
         with:
-          cache: 'npm'
+          cache: "npm"
           node-version: 14
       - run: npm ci
       - run: npm run build

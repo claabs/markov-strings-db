@@ -1,12 +1,13 @@
 import path from 'path';
 import { readFileSync } from 'fs';
-import { Connection, ConnectionOptions, createConnection } from 'typeorm';
+import { DataSource, DataSourceOptions } from 'typeorm';
 import Markov, { AddDataProps, MarkovResult } from '../src/index';
 import { MarkovCorpusEntry } from '../src/entity/MarkovCorpusEntry';
 import { MarkovFragment } from '../src/entity/MarkovFragment';
 import { MarkovInputData } from '../src/entity/MarkovInputData';
 import { MarkovOptions } from '../src/entity/MarkovOptions';
 import { MarkovRoot } from '../src/entity/MarkovRoot';
+import { ormconfig } from './ormconfig';
 
 const data = [
   'Lorem ipsum dolor sit amet',
@@ -21,16 +22,16 @@ const data = [
 
 jest.setTimeout(1000000);
 describe('Markov class', () => {
-  let connection: Connection;
+  const dataSource = new DataSource(ormconfig);
 
   describe('Constructor', () => {
-    it('should extend a connection', async () => {
-      let customConnection: ConnectionOptions = {
+    it('should extend a data source', () => {
+      let customConnection: DataSourceOptions = {
         entities: ['CustomEntity'],
         type: 'better-sqlite3',
         database: 'config/db/db.sqlite3',
       };
-      customConnection = await Markov.extendConnectionOptions(customConnection);
+      customConnection = Markov.extendDataSourceOptions(customConnection);
       expect(customConnection.entities?.length).toBeGreaterThan(1);
     });
 
@@ -45,14 +46,14 @@ describe('Markov class', () => {
     });
 
     it('should persist options in the database', async () => {
-      connection = await createConnection();
+      await dataSource.initialize();
       const markov = new Markov({ options: { stateSize: 3 } });
       await markov.setup();
       const markov2 = new Markov();
       await markov2.setup();
       expect(markov2.options.stateSize).toBe(3);
-      await connection.dropDatabase();
-      await connection.close();
+      await dataSource.dropDatabase();
+      await dataSource.destroy();
     });
   });
 
@@ -60,22 +61,22 @@ describe('Markov class', () => {
     let markov: Markov;
     beforeEach(async () => {
       markov = new Markov();
-      connection = await createConnection();
+      await dataSource.initialize();
     });
 
     afterEach(async () => {
-      await connection.dropDatabase();
-      await connection.close();
+      await dataSource.dropDatabase();
+      await dataSource.destroy();
     });
 
     it('should build corpus', async () => {
-      let count = await MarkovCorpusEntry.count({
-        markov: markov.db,
+      let count = await MarkovCorpusEntry.countBy({
+        markov: { id: markov.db?.id },
       });
       expect(count).toEqual(0);
       await markov.addData(data);
-      count = await MarkovCorpusEntry.count({
-        markov: markov.db,
+      count = await MarkovCorpusEntry.countBy({
+        markov: { id: markov.db.id },
       });
       expect(count).toBeGreaterThan(0);
     });
@@ -86,8 +87,8 @@ describe('Markov class', () => {
     });
     it('should accept objects', async () => {
       await markov.addData(data.map((o) => ({ string: o })));
-      const count = await MarkovCorpusEntry.count({
-        markov: markov.db,
+      const count = await MarkovCorpusEntry.countBy({
+        markov: { id: markov.db.id },
       });
       expect(count).toBeGreaterThan(0);
     });
@@ -97,13 +98,13 @@ describe('Markov class', () => {
     let markov: Markov;
     beforeEach(async () => {
       markov = new Markov();
-      connection = await createConnection();
+      await dataSource.initialize();
       await markov.addData(data);
     });
 
     afterEach(async () => {
-      await connection.dropDatabase();
-      await connection.close();
+      await dataSource.dropDatabase();
+      await dataSource.destroy();
     });
 
     describe('The startWords array', () => {
@@ -118,8 +119,8 @@ describe('Markov class', () => {
           'Fusce tincidunt',
         ];
         const promises = testSet.map(async (startWord) => {
-          const fragment = await MarkovFragment.findOne({
-            startWordMarkov: markov.db,
+          const fragment = await MarkovFragment.findOneBy({
+            startWordMarkov: { id: markov.db.id },
             words: startWord,
           });
           expect(fragment).toBeDefined();
@@ -128,8 +129,8 @@ describe('Markov class', () => {
       });
 
       it('should have the right length', async () => {
-        const count = await MarkovFragment.count({
-          startWordMarkov: markov.db,
+        const count = await MarkovFragment.countBy({
+          startWordMarkov: { id: markov.db.id },
         });
         expect(count).toEqual(8); // This is a change from v3's 7 as this version keeps duplicates
       });
@@ -137,8 +138,8 @@ describe('Markov class', () => {
 
     describe('The endWords array', () => {
       it('should have the right length', async () => {
-        const count = await MarkovFragment.count({
-          endWordMarkov: markov.db,
+        const count = await MarkovFragment.countBy({
+          endWordMarkov: { id: markov.db.id },
         });
         expect(count).toEqual(8); // This is a change from v3's 7 as this version keeps duplicates
       });
@@ -153,8 +154,8 @@ describe('Markov class', () => {
           'est rien…',
         ];
         const promises = testSet.map(async (endWord) => {
-          const fragment = await MarkovFragment.findOne({
-            endWordMarkov: markov.db,
+          const fragment = await MarkovFragment.findOneBy({
+            endWordMarkov: { id: markov.db.id },
             words: endWord,
           });
           expect(fragment).toBeDefined();
@@ -171,13 +172,13 @@ describe('Markov class', () => {
           ['tempor, erat', 'vel lacinia'],
         ];
         const promises = testSet.map(async ([block, words]) => {
-          const entry = await MarkovCorpusEntry.findOne({
-            markov: markov.db,
+          const entry = await MarkovCorpusEntry.findOneBy({
+            markov: { id: markov.db.id },
             block,
           });
           expect(entry).toBeDefined();
-          const fragment = await MarkovFragment.findOne({
-            corpusEntry: entry,
+          const fragment = await MarkovFragment.findOneBy({
+            corpusEntry: { id: entry?.id },
             words,
           });
           expect(fragment).toBeDefined();
@@ -190,13 +191,13 @@ describe('Markov class', () => {
   describe('Import/Export', () => {
     let markov: Markov;
     afterEach(async () => {
-      await connection.dropDatabase();
-      await connection.close();
+      await dataSource.dropDatabase();
+      await dataSource.destroy();
     });
 
     it('should export the original database values', async () => {
       markov = new Markov({ id: '1', options: { id: '1' } });
-      connection = await createConnection();
+      await dataSource.initialize();
       await markov.addData(data);
 
       const exported = await markov.export();
@@ -209,17 +210,17 @@ describe('Markov class', () => {
     describe('Import v3 data', () => {
       it('onto fresh DB', async () => {
         markov = new Markov();
-        connection = await createConnection();
-        let count = await MarkovCorpusEntry.count({
-          markov: markov.db,
+        await dataSource.initialize();
+        let count = await MarkovCorpusEntry.countBy({
+          markov: { id: markov.db?.id },
         });
         expect(count).toEqual(0);
 
         const v3Import = JSON.parse(readFileSync(path.join(__dirname, 'v3-export.json'), 'utf8'));
         await markov.import(v3Import);
 
-        count = await MarkovCorpusEntry.count({
-          markov: markov.db,
+        count = await MarkovCorpusEntry.countBy({
+          markov: { id: markov.db.id },
         });
         expect(count).toEqual(28);
 
@@ -230,14 +231,14 @@ describe('Markov class', () => {
 
       it('should overwrite original values', async () => {
         markov = new Markov();
-        connection = await createConnection();
+        await dataSource.initialize();
         await markov.addData(data);
 
         const v3Import = JSON.parse(readFileSync(path.join(__dirname, 'v3-export.json'), 'utf8'));
         await markov.import(v3Import);
 
-        const count = await MarkovCorpusEntry.count({
-          markov: markov.db,
+        const count = await MarkovCorpusEntry.countBy({
+          markov: { id: markov.db.id },
         });
         expect(count).toEqual(28);
       });
@@ -246,17 +247,17 @@ describe('Markov class', () => {
     describe('Import v4 data', () => {
       it('onto fresh DB', async () => {
         markov = new Markov();
-        connection = await createConnection();
-        let count = await MarkovCorpusEntry.count({
-          markov: markov.db,
+        await dataSource.initialize();
+        let count = await MarkovCorpusEntry.countBy({
+          markov: { id: markov.db?.id },
         });
         expect(count).toEqual(0);
 
         const v4Import = JSON.parse(readFileSync(path.join(__dirname, 'v4-export.json'), 'utf8'));
         await markov.import(v4Import);
 
-        count = await MarkovCorpusEntry.count({
-          markov: markov.db,
+        count = await MarkovCorpusEntry.countBy({
+          markov: { id: markov.db.id },
         });
         expect(count).toEqual(28);
 
@@ -267,14 +268,14 @@ describe('Markov class', () => {
 
       it('should overwrite original values', async () => {
         markov = new Markov();
-        connection = await createConnection();
+        await dataSource.initialize();
         await markov.addData(data);
 
         const v4Import = JSON.parse(readFileSync(path.join(__dirname, 'v4-export.json'), 'utf8'));
         await markov.import(v4Import);
 
-        const count = await MarkovCorpusEntry.count({
-          markov: markov.db,
+        const count = await MarkovCorpusEntry.countBy({
+          markov: { id: markov.db.id },
         });
         expect(count).toEqual(28);
       });
@@ -286,12 +287,12 @@ describe('Markov class', () => {
     describe('With no data', () => {
       beforeEach(async () => {
         markov = new Markov();
-        connection = await createConnection();
+        await dataSource.initialize();
       });
 
       afterEach(async () => {
-        await connection.dropDatabase();
-        await connection.close();
+        await dataSource.dropDatabase();
+        await dataSource.destroy();
       });
 
       it('should throw an error if the corpus is not built', async () => {
@@ -329,13 +330,13 @@ describe('Markov class', () => {
     describe('With data', () => {
       beforeEach(async () => {
         markov = new Markov();
-        connection = await createConnection();
+        await dataSource.initialize();
         await markov.addData(data);
       });
 
       afterEach(async () => {
-        await connection.dropDatabase();
-        await connection.close();
+        await dataSource.dropDatabase();
+        await dataSource.destroy();
       });
 
       it('should return a result if under the tries limit', async () => {
@@ -371,8 +372,8 @@ describe('Markov class', () => {
           const result = await markov.generate();
           const arr = result.string.split(' ');
           const end = arr.slice(arr.length - 2, arr.length);
-          const endWords = await MarkovFragment.findOne({
-            endWordMarkov: markov.db,
+          const endWords = await MarkovFragment.findOneBy({
+            endWordMarkov: { id: markov.db.id },
             words: end.join(' '),
           });
           expect(endWords).toBeDefined();
@@ -463,8 +464,8 @@ describe('Markov class', () => {
 
         await markov.addData(data);
 
-        const count = await MarkovFragment.count({
-          startWordMarkov: markov.db,
+        const count = await MarkovFragment.countBy({
+          startWordMarkov: { id: markov.db.id },
         });
         expect(count).toEqual(8); // This is a change from v3's 7 as this version keeps duplicates
       });
@@ -491,7 +492,7 @@ describe('Markov class', () => {
     describe('With tagged data', () => {
       beforeEach(async () => {
         markov = new Markov();
-        connection = await createConnection();
+        await dataSource.initialize();
 
         const customData: AddDataProps[] = data.map((datum, idx) => ({
           string: datum,
@@ -501,8 +502,8 @@ describe('Markov class', () => {
       });
 
       afterEach(async () => {
-        await connection.dropDatabase();
-        await connection.close();
+        await dataSource.dropDatabase();
+        await dataSource.destroy();
       });
 
       it(`should erase using the tags`, async () => {
