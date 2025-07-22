@@ -1,6 +1,6 @@
 {
   "name": "markov-strings-db",
-  "version": "4.2.0",
+  "version": "4.3.0",
   "description": "A Markov string generator that utilizes a relational SQL database",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
@@ -15,7 +15,7 @@
     "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js"
   },
   "engines": {
-    "node": ">=14"
+    "node": ">=18"
   },
   "repository": {
     "type": "git",
@@ -35,14 +35,14 @@
   "license": "MIT",
   "dependencies": {
     "reflect-metadata": "^0.1.13",
-    "typeorm": "^0.3.3"
+    "typeorm": "^0.3.25"
   },
   "devDependencies": {
     "@types/jest": "^27.4.1",
-    "@types/node": "^16.11.26",
+    "@types/node": "^18.19.120",
     "@typescript-eslint/eslint-plugin": "^5.16.0",
     "@typescript-eslint/parser": "^5.16.0",
-    "better-sqlite3": "^7.5.0",
+    "better-sqlite3": "^11.10.0",
     "eslint": "^8.12.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.5.0",
@@ -54,6 +54,6 @@
     "rimraf": "^3.0.2",
     "ts-jest": "^27.1.4",
     "ts-node": "^10.7.0",
-    "typescript": "^4.6.3"
+    "typescript": "^4.9.5"
   }
 }

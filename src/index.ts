@@ -124,7 +124,7 @@ export type Corpus = Record<string, MarkovFragment[]>;
 export default class Markov {
   public db: MarkovRoot;
 
-  public options: MarkovOptions | MarkovDataMembers;
+  public options: MarkovConstructorProps & MarkovDataMembers;
 
   public id: string;
 
@@ -256,7 +256,7 @@ export default class Markov {
       this.db = await MarkovRoot.findOneByOrFail({ id: this.id }); // Repopulate the top level MarkovRoot fields
     } else {
       // Legacy import
-      const options = MarkovOptions.create(data.options);
+      const options = MarkovOptions.create({ stateSize: data.options.stateSize });
       await MarkovOptions.save(options);
       this.db = new MarkovRoot();
       this.db.id = this.id;

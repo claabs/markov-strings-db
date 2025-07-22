@@ -18,7 +18,7 @@ This rewrite was created for the Discord bot [markov-discord](https://github.com
 
 ## Prerequisites
 
-- NodeJS 14+
+- NodeJS 18+
 - The host app must be configured with a [TypeORM](https://typeorm.io)-compatible database driver
 
 ## Installing
