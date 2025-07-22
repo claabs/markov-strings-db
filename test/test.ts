@@ -296,7 +296,7 @@ describe('Markov class', () => {
       });
 
       it('should throw an error if the corpus is not built', async () => {
-        await expect(markov.generate()).rejects.toThrowError(
+        await expect(markov.generate()).rejects.toThrow(
           'Corpus is empty. There is either no data, or the data is not sufficient to create markov chains.'
         );
       });
@@ -362,7 +362,7 @@ describe('Markov class', () => {
               return false;
             },
           })
-        ).rejects.toThrowError('10');
+        ).rejects.toThrow('10');
       });
 
       it('should end with a value from endWords', async () => {

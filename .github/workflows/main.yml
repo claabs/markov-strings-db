@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: ["14", "16"]
+        node: ["18", "20", "22", "24"]
     name: Node ${{ matrix.node }} sample
     steps:
       - uses: actions/checkout@v2
@@ -35,6 +35,6 @@ jobs:
         uses: actions/setup-node@v2
         with:
           cache: "npm"
-          node-version: 14
+          node-version-file: ".nvmrc"
       - run: npm ci
       - run: npm run build
