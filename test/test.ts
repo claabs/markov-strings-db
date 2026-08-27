@@ -83,7 +83,7 @@ describe('Markov class', () => {
     it('should throw an error if the data structure is invalid', async () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      await expect(markov.addData([{}])).rejects.toThrowError();
+      await expect(markov.addData([{}])).rejects.toThrow();
     });
     it('should accept objects', async () => {
       await markov.addData(data.map((o) => ({ string: o })));
